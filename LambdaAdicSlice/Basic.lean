@@ -226,3 +226,62 @@ theorem charpoly_eq_of_isConj
 end CharpolyConj
 
 end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section FrobeniusConcrete
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+
+/-- The integral closure of `A` in `K̄`. -/
+abbrev IntClosure := integralClosure A Kbar
+
+/-- `G_K` acts on the integral closure of `A` in `K̄`.
+
+This instance is **not** in Mathlib v4.28.0 and is the missing link that
+prevents `IsArithFrobAt` from being applied to the absolute Galois group. -/
+instance : MulSemiringAction (AbsGal K Kbar) (IntClosure A Kbar) where
+  smul g x := ⟨g x, IsIntegral.map ((g : Kbar →ₐ[K] Kbar).restrictScalars A) x.2⟩
+  one_smul x := by ext; simp
+  mul_smul g h x := by ext; simp
+  smul_zero g := by ext; simp
+  smul_add g x y := by ext; simp
+  smul_one g := by ext; simp
+  smul_mul g x y := by ext; simp
+
+end FrobeniusConcrete
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section FrobeniusDefined
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+
+/-- The `G_K`-action commutes with the `A`-action, because `A` lands in `K`
+and `G_K` fixes `K` pointwise. Required by `IsArithFrobAt`. -/
+instance : SMulCommClass (AbsGal K Kbar) A (IntClosure A Kbar) where
+  smul_comm g a x := by
+    ext
+    simp [Algebra.smul_def, IsScalarTower.algebraMap_apply A K Kbar]
+
+/-- `g : G_K` is a **Frobenius at `v`** if there is a prime `Q` of the integral
+closure of `A` in `K̄` lying over `v` at which `g` is an arithmetic Frobenius in
+Mathlib's sense (`IsArithFrobAt`).
+
+This is a definition, not an axiom: it uses `Mathlib/RingTheory/Frobenius.lean`
+directly, via the `MulSemiringAction` instance above. -/
+def IsFrobAt (v : HeightOneSpectrum A) (g : AbsGal K Kbar) : Prop :=
+  ∃ Q : Ideal (IntClosure A Kbar), Q.IsPrime ∧ Q.under A = v.asIdeal ∧
+    IsArithFrobAt A g Q
+
+end FrobeniusDefined
+
+end LambdaAdicSlice
