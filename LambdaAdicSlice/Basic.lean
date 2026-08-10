@@ -285,3 +285,31 @@ def IsFrobAt (v : HeightOneSpectrum A) (g : AbsGal K Kbar) : Prop :=
 end FrobeniusDefined
 
 end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section FrobeniusProperties
+
+open scoped Pointwise
+
+variable {A K Kbar : Type*} [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+
+omit [IsDedekindDomain A] [IsFractionRing A K] [IsAlgClosure K Kbar] in
+/-- Conjugates of a Frobenius element at `v` are again Frobenius elements at `v`.
+
+Proved from `IsArithFrobAt.conj`: conjugating the automorphism moves the prime
+`Q` to `x • Q`, which still lies over `v`. -/
+theorem isFrobAt_conj {v : HeightOneSpectrum A} {g x : AbsGal K Kbar}
+    (h : IsFrobAt A K Kbar v g) : IsFrobAt A K Kbar v (x * g * x⁻¹) := by
+  obtain ⟨Q, hQp, hQu, hQf⟩ := h
+  refine ⟨x • Q, ?_, ?_, hQf.conj x⟩
+  · exact hQp.smul x
+  · rw [← hQu]
+    exact Ideal.under_smul A Q x
+
+end FrobeniusProperties
+
+end LambdaAdicSlice
