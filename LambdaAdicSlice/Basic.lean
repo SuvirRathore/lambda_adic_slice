@@ -1,1 +1,114 @@
-def hello := "world"
+/-
+Statement-level formalisation: compatible families of λ-adic representations
+and the char-poly independence condition.
+
+Every proof is `sorry`. Ingredients Mathlib v4.28.0 cannot construct are taken
+as explicit parameters and documented as such.
+-/
+import Mathlib
+
+open IsDedekindDomain NumberField Matrix Polynomial
+
+namespace LambdaAdicSlice
+
+section Setup
+
+-- `A` is a Dedekind domain with fraction field `K`; the finite places of `K`
+-- are the height-one primes of `A`. This covers number fields (`A = 𝓞 K`) and
+-- function fields of curves over finite fields alike.
+variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+
+-- A fixed algebraic closure of `K`.
+variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+
+/-- The absolute Galois group `G_K`. The Krull topology instance comes from
+`Mathlib/FieldTheory/KrullTopology.lean`. -/
+abbrev AbsGal := Kbar ≃ₐ[K] Kbar
+
+-- The coefficient field `E`.
+variable (E : Type*) [Field E] [NumberField E]
+
+/-- Finite places of `E`. -/
+abbrev CoeffPlace := HeightOneSpectrum (𝓞 E)
+
+/-- The completion `E_λ`. -/
+abbrev Completion (lam : CoeffPlace E) := lam.adicCompletion E
+
+variable (n : ℕ)
+
+/-- A `λ`-adic representation: a continuous homomorphism `G_K → GL_n(E_λ)`. -/
+structure LambdaAdicRep (lam : CoeffPlace E) where
+  toHom : AbsGal K Kbar →* GL (Fin n) (Completion E lam)
+  continuous_toHom : Continuous toHom
+
+end Setup
+
+section MissingFromMathlib
+
+/-!
+## Ingredients not available in Mathlib v4.28.0
+
+* `Frob_v` in the *absolute* Galois group. `Mathlib/RingTheory/Frobenius.lean`
+  provides `arithFrobAt` only for a finite group acting on a ring, i.e. at
+  finite level; there is no inverse-limit construction, and no
+  conjugacy-class-valued Frobenius for `G_K`.
+* The unramified-outside-`S` condition *for a representation*.
+* The condition `v ∤ ℓ(λ)` relating a place of `K` to the residue
+  characteristic of a place of `E`.
+
+Each is taken as a parameter below.
+-/
+
+variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+-- `IsFrobAt v g` : `g` is a Frobenius element at the place `v`.
+variable (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop)
+
+-- `IsUnramAt lam ρ v` : the representation `ρ` is unramified at `v`.
+variable (IsUnramAt : ∀ lam : CoeffPlace E,
+  LambdaAdicRep K Kbar E n lam → HeightOneSpectrum A → Prop)
+
+-- `Good v lam` : `v ∤ ℓ(λ)`, i.e. `v` does not divide the residue
+-- characteristic of `lam`.
+variable (Good : HeightOneSpectrum A → CoeffPlace E → Prop)
+
+end MissingFromMathlib
+
+section CompatibleFamily
+
+variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+variable (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop)
+variable (IsUnramAt : ∀ lam : CoeffPlace E,
+  LambdaAdicRep K Kbar E n lam → HeightOneSpectrum A → Prop)
+variable (Good : HeightOneSpectrum A → CoeffPlace E → Prop)
+
+/-- A family `(ρ_λ)` of `λ`-adic representations is a **compatible family
+unramified outside `S`**.
+
+The `charpoly` field states both halves of condition (2) at once: the
+polynomial `P` is quantified *outside* `λ`, so it simultaneously says the
+characteristic polynomial has coefficients in `E` and is independent of `λ`. -/
+structure IsCompatibleFamily
+    (S : Finset (HeightOneSpectrum A))
+    (rho : ∀ lam : CoeffPlace E, LambdaAdicRep K Kbar E n lam) : Prop where
+  /-- Each `ρ_λ` is unramified at every `v ∉ S` with `v ∤ ℓ(λ)`. -/
+  unramified : ∀ (lam : CoeffPlace E) (v : HeightOneSpectrum A),
+    v ∉ S → Good v lam → IsUnramAt lam (rho lam) v
+  /-- For `v ∉ S`, the characteristic polynomial of `ρ_λ(Frob_v)` is the image
+  of a polynomial over `E` not depending on `λ`. -/
+  charpoly : ∀ v : HeightOneSpectrum A, v ∉ S →
+    ∃ P : E[X], ∀ (lam : CoeffPlace E) (g : AbsGal K Kbar),
+      Good v lam → IsFrobAt v g →
+        ((rho lam).toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly
+          = P.map (algebraMap E (Completion E lam))
+
+end CompatibleFamily
+
+end LambdaAdicSlice
