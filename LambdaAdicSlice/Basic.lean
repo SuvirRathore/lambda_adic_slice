@@ -152,3 +152,77 @@ theorem exists_isCompatibleFamily_of_unramified
 end Lafforgue
 
 end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section FrobeniusSystem
+
+variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+/-- Characterising axioms for an abstract Frobenius predicate on `G_K`.
+
+Mathlib v4.28.0 cannot construct `Frob_v` in the absolute Galois group. The
+predicate `IsArithFrobAt` is available for a *monoid* acting on a ring — no
+finiteness required — but the action of `G_K` on the integral closure of `A`
+in `K̄` is not instantiated, so the predicate cannot be applied at that level.
+
+These are the properties the compatible-family definition actually depends on:
+a Frobenius exists at each place, and it is well defined up to conjugacy. -/
+structure IsFrobeniusSystem
+    (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop) : Prop where
+  /-- A Frobenius element exists at every finite place. -/
+  exists_frob : ∀ v : HeightOneSpectrum A, ∃ g, IsFrobAt v g
+  /-- Any two Frobenius elements at the same place are conjugate. -/
+  isConj_of : ∀ (v : HeightOneSpectrum A) (g g' : AbsGal K Kbar),
+    IsFrobAt v g → IsFrobAt v g' → IsConj g g'
+  /-- Frobenius elements at a place are closed under conjugation. -/
+  conj_mem : ∀ (v : HeightOneSpectrum A) (g x : AbsGal K Kbar),
+    IsFrobAt v g → IsFrobAt v (x * g * x⁻¹)
+
+end FrobeniusSystem
+
+section CharpolyConj
+
+/-- Conjugate elements of `GL m R` have the same characteristic polynomial.
+
+Proved, not assumed. Stated over an abstract `CommRing` so that elaboration
+does not have to work inside a completion. -/
+theorem charpoly_eq_of_isConj_gl {R : Type*} [CommRing R] {m : ℕ}
+    {x y : GL (Fin m) R} (h : IsConj x y) :
+    (x : Matrix (Fin m) (Fin m) R).charpoly
+      = (y : Matrix (Fin m) (Fin m) R).charpoly := by
+  obtain ⟨c, hc⟩ := isConj_iff.mp h
+  rw [← hc]
+  simp only [Units.val_mul]
+  exact (Matrix.charpoly_units_conj c _).symm
+
+variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+set_option maxHeartbeats 1000000 in
+-- `Completion E lam` is a `UniformSpace.Completion`; unification inside it is
+-- expensive and the default heartbeat budget is insufficient.
+omit [IsAlgClosure K Kbar] in
+/-- The characteristic polynomial of `ρ_λ(Frob_v)` does not depend on the
+choice of Frobenius element at `v`.
+
+This is the well-definedness fact that makes the compatible-family condition
+meaningful. It is proved from `IsFrobeniusSystem.isConj_of`. -/
+theorem charpoly_eq_of_isConj
+    {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam)
+    {g g' : AbsGal K Kbar} (h : IsConj g g') :
+    (rho.toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly
+      = (rho.toHom g' : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly := by
+  obtain ⟨c, hc⟩ := isConj_iff.mp h
+  refine charpoly_eq_of_isConj_gl (isConj_iff.mpr ⟨rho.toHom c, ?_⟩)
+  rw [← hc]
+  simp [map_mul, map_inv]
+
+end CharpolyConj
+
+end LambdaAdicSlice
