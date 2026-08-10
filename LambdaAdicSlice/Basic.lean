@@ -112,3 +112,43 @@ structure IsCompatibleFamily
 end CompatibleFamily
 
 end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section Lafforgue
+
+variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+variable (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop)
+variable (IsUnramAt : ∀ lam : CoeffPlace E,
+  LambdaAdicRep K Kbar E n lam → HeightOneSpectrum A → Prop)
+variable (Good : HeightOneSpectrum A → CoeffPlace E → Prop)
+
+-- `K` is a global function field: the function field of a smooth projective
+-- curve over the finite field `Fq`. Mathlib's `FunctionField Fq K` gives the
+-- field-theoretic half; there is no curve attached to it in v4.28.0.
+variable (Fq : Type*) [Field Fq] [Finite Fq] [Algebra (RatFunc Fq) K]
+
+/-- **Deligne's conjecture for curves** (L. Lafforgue).
+
+Every continuous `λ`-adic representation of `G_K` unramified outside `S` is a
+member of a compatible family unramified outside `S`.
+
+Statement only: the proof is `sorry`. -/
+theorem exists_isCompatibleFamily_of_unramified
+    (hK : FunctionField Fq K)
+    (S : Finset (HeightOneSpectrum A))
+    (lam₀ : CoeffPlace E)
+    (hchar : ringChar (𝓞 E ⧸ lam₀.asIdeal) ≠ ringChar K)
+    (rho₀ : LambdaAdicRep K Kbar E n lam₀)
+    (hunram : ∀ v : HeightOneSpectrum A, v ∉ S → IsUnramAt lam₀ rho₀ v) :
+    ∃ rho : ∀ lam : CoeffPlace E, LambdaAdicRep K Kbar E n lam,
+      rho lam₀ = rho₀ ∧
+        IsCompatibleFamily A K Kbar E n IsFrobAt IsUnramAt Good S rho := by
+  sorry
+
+end Lafforgue
+
+end LambdaAdicSlice
