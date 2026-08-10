@@ -1,8 +1,9 @@
 # lambda_adic_slice
 
 Statement-level formalisation of one definitional slice from arithmetic geometry.
-Statements only: every proof is `sorry`. The point is to locate which ingredients
-Mathlib v4.28.0 currently supports and which are missing.
+The point is to locate which ingredients Mathlib v4.28.0 currently supports and
+which are missing. The main theorem is stated, not proved; two supporting
+results are proved.
 
 ## The slice
 
@@ -22,20 +23,40 @@ Fix:
 2. for every such `v`, the characteristic polynomial of `ρ_λ(Frob_v)` has
    coefficients in `E` (via a fixed embedding `E ↪ E_λ`) and is independent of `λ`.
 
-**Theorem (Deligne's conjecture for curves; L. Lafforgue).** Suppose `K` is a global
+**Theorem (Deligne's conjecture, proved by L. Lafforgue).** Suppose `K` is a global
 function field, i.e. the function field of a smooth projective curve over a finite
 field, and `ℓ(λ) ≠ char K`. Then every continuous `λ`-adic representation
 `ρ_λ : G_K → GL_n(E_λ)` unramified outside `S` is a member of a compatible family
 unramified outside `S`.
 
+## Status
+
+Definitions and the Lafforgue statement compile against Mathlib v4.28.0. Two results
+are *proved*, not assumed:
+
+- `charpoly_eq_of_isConj` — the characteristic polynomial of `ρ_λ(g)` depends only on
+  the conjugacy class of `g`, so condition (2) is well posed;
+- `isFrobAt_conj` — conjugates of a Frobenius element at `v` are again Frobenius
+  elements at `v`.
+
+`IsFrobAt` is a definition, not an axiom: it is built on Mathlib's `IsArithFrobAt`
+via a `MulSemiringAction` of `G_K` on the integral closure of `A` in `K̄`, which
+Mathlib does not provide and which is supplied here.
+
+Existence of a Frobenius element at each place remains an axiom. This is not missing
+API: Mathlib's existence proof (`exists_of_isInvariant`) requires a finite residue
+field at the chosen prime, and at `K̄` that residue field is the algebraic closure of
+`A/v`, hence infinite. The *definition* of arithmetic Frobenius transfers to the
+infinite level; the existence *proof* does not.
+
 ## Note on formulation
 
 Stated via `G_K` with an unramified-outside-`S` condition rather than via
 `π₁^ét(X ∖ S)`. These agree for a smooth projective curve `X` with function field `K`,
-and the `G_K` formulation is the one Mathlib v4.28.0 can plausibly express: Galois
-categories and fibre functors exist abstractly (`Mathlib/CategoryTheory/Galois/`),
-but the finite étale site of a scheme is not instantiated as a Galois category, so
-there is no `π₁^ét(X)` available.
+and the `G_K` formulation is the one Mathlib v4.28.0 can express: Galois categories
+and fibre functors exist abstractly (`Mathlib/CategoryTheory/Galois/`), but the finite
+étale site of a scheme is not instantiated as a Galois category, so there is no
+`π₁^ét(X)` available.
 
 ## Future work (currently out of scope)
 
