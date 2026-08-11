@@ -42,6 +42,11 @@ with determinant of finite order.
 Stated one place `λ` at a time. A family indexed by all `λ` follows by choice and
 carries the same existence content.
 
+`M` carries the `E_λ`-module topology (`IsModuleTopology`), not an arbitrary one;
+that is what makes "continuous" well-posed. For a finite extension of the
+complete field `E_λ` it is the canonical valuation topology, so the degenerate
+reading — indiscrete topology, every map continuous — is excluded.
+
 ## What is proved
 
 - `charpoly_eq_of_isConj_gl`, `charpoly_eq_of_isConj` — the characteristic
@@ -92,13 +97,21 @@ no topology, and applies unchanged to the companion over `M`.
   Drinfeld's Lemma 2.7 (arXiv:1007.4004) is an elementary Brauer-group argument:
   a semisimple representation of dimension `r` over an algebraic closure of `E_λ`
   whose character is defined over `E_λ` descends to any extension whose degree is
-  divisible by each of `r, r-1, …, 2`. The companion's characteristic polynomials
-  lie in `E ⊆ E_λ` and it is irreducible, so `[M : E_λ] = n!` suffices. Not stated
-  in the Lean: it sharpens nothing the slice needs.
+  divisible by each of `r, r-1, …, 2`. Its hypothesis is met here: the companion
+  is irreducible, hence semisimple, and its character is defined over `E_λ`
+  because the Frobenius traces lie in `E ⊆ E_λ`, the Frobenii are dense by
+  Chebotarev in the quotient through which the companion factors, the trace is
+  continuous, and `E_λ` is closed in `M`. So `[M : E_λ] = n!` suffices. Not
+  stated in the Lean: it sharpens nothing the slice needs.
 - **Integrality.** Drinfeld's Theorem 1.1 carries a hypothesis that the roots of
-  the characteristic polynomials are `λ`-adic units. Here that is a *consequence*
-  of absolute irreducibility and finite-order determinant, via purity, not an
-  extra assumption. Nothing has been dropped relative to Theorem 1.1.
+  the characteristic polynomials are `λ`-adic units. For curves that is a
+  *consequence* of absolute irreducibility and finite-order determinant, not an
+  extra assumption, so nothing has been dropped — but the mechanism is not
+  purity. Being a unit away from `p` is part (c) of Deligne's Conjecture 1.2.10,
+  a conclusion separate from the weight condition, and for curves it is part of
+  what Lafforgue's Théorème VII.6 proves. Purity is the archimedean statement and
+  does not imply integrality: `(3 + 4i)/5` has absolute value `1` at every
+  archimedean place and is not a `5`-adic unit.
 - **At `λ₀`.** One may take `M = E_{λ₀}` and `ρ = ρ₀`, so `ρ₀` is itself one of
   the companions. No separate clause asserting this is needed, and none is
   stated: once the coefficient field varies, an equality `ρ_{λ₀} = ρ₀` is
@@ -107,9 +120,10 @@ no topology, and applies unchanged to the companion over `M`.
 ## Limitations — deliberately out of scope
 
 - **Frobenius existence is assumed, not proved.** `FrobeniusChoice` takes it as
-  data. Mathlib's `exists_of_isInvariant` requires a finite residue field at the
-  chosen prime; at `K̄` that residue field is the algebraic closure of `A/v`, so
-  the proof does not transfer. Proving it needs surjectivity of the decomposition
+  data. Mathlib's `exists_of_isInvariant` fails here on three counts, not one: it
+  requires a finite residue field at the chosen prime (at `K̄` that field is the
+  algebraic closure of `A/v`), a finite acting group, and `Algebra.IsInvariant`.
+  Proving existence needs surjectivity of the decomposition
   group onto the residue Galois group plus an inverse-limit or Zorn argument over
   finite subextensions. The *definition* of arithmetic Frobenius transfers to the
   infinite level; the existence *proof* does not. Every result mentioning
@@ -176,6 +190,12 @@ making the statement satisfiable by an everywhere-unramified companion-matrix
 construction; and that the first round's fixes had been applied to the code but
 not to the documentation, leaving a docstring that reasserted the rejected
 well-definedness claim and cited an axiom that had been deleted.
+
+A third review, run against the repaired state with the two earlier reviews
+withheld, found no false or vacuous content and no drift between code and
+documentation. It found two prose overclaims — a misattributed mechanism in the
+integrality remark, and an equivalence stated without the scope conditions it
+needs — both corrected above.
 
 Further review is welcome — see `CAPABILITY_LOG.md`.
 

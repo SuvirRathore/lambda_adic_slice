@@ -125,3 +125,56 @@ monodromy-group paper.
 **Unchanged.** The W30 candidate remains "Frobenius elements exist in the
 absolute Galois group": genuinely missing, self-contained, and a plausible
 Mathlib PR.
+
+## 11-08-2026 — third independent review
+
+Run against the repaired state, with the round-1 and round-2 transcripts withheld
+to avoid anchoring on the same questions.
+
+**Verdict.** No false content, no vacuity, no code/documentation drift. All five
+proved lemmas re-derived and their Mathlib dependencies checked against v4.28.0
+source. The `sorry`'d statement judged a faithful, satisfiable, honestly-scoped
+rendering of Lafforgue's companion theorem for the affine curve, neither stronger
+nor weaker than the literature package. Non-degenerate satisfiability exhibited:
+`A = 𝔽_q[t]`, `ρ₀` the 2-dimensional representation of an `S₃`-cover.
+
+**Corrected.** Two prose overclaims. The integrality remark attributed unit-ness
+of the Frobenius roots to purity; it is instead part (c) of Deligne's Conjecture
+1.2.10, proved for curves by Lafforgue VII.6, and is a conclusion separate from
+the weight condition — Drinfeld's own `Γ^mix` versus `Γ^mot` distinction makes
+this explicit, and `(3+4i)/5` is a one-line witness that purity does not imply
+integrality. The `SpanFull` docstring stated the Burnside equivalence without its
+scope: it needs `R` a field and `m ≥ 1`, both of which hold at every use site but
+neither of which was said. Three cosmetic gaps also closed.
+
+**A claim of ours that was wrong.** We had reasoned that continuity of a
+representation of `G_K` into `GL_n(E_λ)` forces unramifiedness at almost all
+places. False for `n ≥ 2`. Compactness gives a stable lattice and hence a finite
+ramification set at each finite level, but the level-wise sets need not stabilise:
+a Kummer class built from `b_m = ∏_{i≤m} π_i^{ℓ^i}` gives a continuous
+upper-triangular `ρ = (χ_ℓ, c; 0, 1) : G_K → GL₂(ℤ_ℓ)` ramified at every `v_i`.
+Ramakrishna, *Infinitely ramified Galois representations*, Ann. of Math. 151
+(2000), shows even full image is compatible with infinite ramification;
+Khare–Rajan, IMRN 2001 no. 12, show the ramified set has density zero but can be
+infinite. True for `n = 1`, where the torsion of `1 + 𝔪` is finite and class field
+theory closes the argument. This is why "finitely ramified" is an explicit
+condition in Fontaine–Mazur rather than a consequence of continuity, and it means
+`hunram` is load-bearing rather than a convenience.
+
+**Mathlib survey additions (v4.28.0).**
+- `IsArithFrobAt.exists_of_isInvariant` fails at the infinite level on three
+  counts, not one: finite residue field, `[Finite G]`, and
+  `[Algebra.IsInvariant R S G]`.
+- `isPretransitive_of_isGaloisGroup` requires `[Finite G] [IsGaloisGroup G A B]`,
+  so transitivity of the action on primes above `v` is unavailable here.
+- Chebotarev density is absent from Mathlib entirely.
+- `Ideal.inertia G Q = {g | ∀ x, g • x - x ∈ Q}`; since `C ⧸ Q` is integral over
+  the field `A ⧸ v` it is a field and equals the residue field of the
+  corresponding place of `K̄`, so this is literally the classical inertia group,
+  and membership already forces stabilisation of `Q` — no decomposition-group
+  clause is needed.
+
+**Not verifiable by review.** Compile status and the axiom audit are attested, not
+reproduced; an instance diamond on the supplied `MulSemiringAction` can only be
+excluded by a build. Lafforgue VII.6 and Deligne 1.2.10 were checked through
+Drinfeld's verbatim quotations, not the paywalled originals.

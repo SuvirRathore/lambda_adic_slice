@@ -207,10 +207,12 @@ variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
 /-- A choice of Frobenius element at every finite place.
 
 Existence of Frobenius elements in the *absolute* Galois group is not available
-in Mathlib v4.28.0: `IsArithFrobAt.exists_of_isInvariant` requires a finite
-residue field at the chosen prime, which fails at `K̄`. Proving it needs the
-surjectivity of the decomposition group onto the residue Galois group together
-with an inverse-limit or Zorn argument over finite subextensions.
+in Mathlib v4.28.0. `IsArithFrobAt.exists_of_isInvariant` fails at `K̄` on three
+counts, not one: it requires a finite residue field at the chosen prime (at `K̄`
+that field is the algebraic closure of `A/v`), a finite acting group, and
+`Algebra.IsInvariant`. Proving existence needs the surjectivity of the
+decomposition group onto the residue Galois group together with an
+inverse-limit or Zorn argument over finite subextensions.
 
 Taking it as data rather than deriving it makes the assumption explicit and
 removes the vacuity that an unquantified `IsFrobAt v g → ...` would introduce.
@@ -290,14 +292,22 @@ section AbsoluteConditions
 
 /-- The image of `ρ` spans the full matrix algebra.
 
-This is **absolute irreducibility**, stated with no algebraic closure anywhere.
-The image contains `1` and is closed under multiplication, so its `R`-linear span
-is already an `R`-subalgebra. If that span is all of `M_m(R)` then it stays so
+For `R` a **field** and `m ≥ 1` this is **absolute irreducibility**, stated with
+no algebraic closure anywhere. The image contains `1` and is closed under
+multiplication, so its `R`-linear span is already an `R`-subalgebra. If that
+span is all of `M_m(R)` then it stays so
 after any scalar extension, hence there is no proper nonzero invariant subspace
 over any extension. Conversely, if `ρ` is absolutely irreducible then Burnside's
 theorem over an algebraic closure `R̄` gives a span of dimension `m ^ 2`, and the
 span over `R̄` is `R̄ ⊗ (span over R)`, so the span over `R` already has dimension
 `m ^ 2`.
+
+Both scope conditions hold at every use site: the coefficient rings are `E_λ`
+and a finite extension `M` of it, and `exists_companion` assumes `0 < n`. Outside
+that scope the reading degrades — at `m = 0` the predicate holds trivially while
+irreducibility fails, and over a general `CommRing` the equivalence is not
+well-posed. The definition is stated at `CommRing` generality because nothing
+below needs more.
 
 The equivalence is not formalised; it is what justifies the choice of predicate. -/
 def SpanFull {G R : Type*} [Monoid G] [CommRing R] {m : ℕ}
