@@ -44,145 +44,17 @@ structure LambdaAdicRep (lam : CoeffPlace E) where
 
 end Setup
 
-section MissingFromMathlib
 
-/-!
-## Ingredients not available in Mathlib v4.28.0
-
-* `Frob_v` in the *absolute* Galois group. `Mathlib/RingTheory/Frobenius.lean`
-  provides `arithFrobAt` only for a finite group acting on a ring, i.e. at
-  finite level; there is no inverse-limit construction, and no
-  conjugacy-class-valued Frobenius for `G_K`.
-* The unramified-outside-`S` condition *for a representation*.
-* The condition `v ∤ ℓ(λ)` relating a place of `K` to the residue
-  characteristic of a place of `E`.
-
-Each is taken as a parameter below.
--/
-
-variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
-  [Algebra A K] [IsFractionRing A K]
-variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
-variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
-
--- `IsFrobAt v g` : `g` is a Frobenius element at the place `v`.
-variable (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop)
-
--- `IsUnramAt lam ρ v` : the representation `ρ` is unramified at `v`.
-variable (IsUnramAt : ∀ lam : CoeffPlace E,
-  LambdaAdicRep K Kbar E n lam → HeightOneSpectrum A → Prop)
-
--- `Good v lam` : `v ∤ ℓ(λ)`, i.e. `v` does not divide the residue
--- characteristic of `lam`.
-variable (Good : HeightOneSpectrum A → CoeffPlace E → Prop)
-
-end MissingFromMathlib
-
-section CompatibleFamily
-
-variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
-  [Algebra A K] [IsFractionRing A K]
-variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
-variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
-variable (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop)
-variable (IsUnramAt : ∀ lam : CoeffPlace E,
-  LambdaAdicRep K Kbar E n lam → HeightOneSpectrum A → Prop)
-variable (Good : HeightOneSpectrum A → CoeffPlace E → Prop)
-
-/-- A family `(ρ_λ)` of `λ`-adic representations is a **compatible family
-unramified outside `S`**.
-
-The `charpoly` field states both halves of condition (2) at once: the
-polynomial `P` is quantified *outside* `λ`, so it simultaneously says the
-characteristic polynomial has coefficients in `E` and is independent of `λ`. -/
-structure IsCompatibleFamily
-    (S : Finset (HeightOneSpectrum A))
-    (rho : ∀ lam : CoeffPlace E, LambdaAdicRep K Kbar E n lam) : Prop where
-  /-- Each `ρ_λ` is unramified at every `v ∉ S` with `v ∤ ℓ(λ)`. -/
-  unramified : ∀ (lam : CoeffPlace E) (v : HeightOneSpectrum A),
-    v ∉ S → Good v lam → IsUnramAt lam (rho lam) v
-  /-- For `v ∉ S`, the characteristic polynomial of `ρ_λ(Frob_v)` is the image
-  of a polynomial over `E` not depending on `λ`. -/
-  charpoly : ∀ v : HeightOneSpectrum A, v ∉ S →
-    ∃ P : E[X], ∀ (lam : CoeffPlace E) (g : AbsGal K Kbar),
-      Good v lam → IsFrobAt v g →
-        ((rho lam).toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly
-          = P.map (algebraMap E (Completion E lam))
-
-end CompatibleFamily
 
 end LambdaAdicSlice
 
 namespace LambdaAdicSlice
 
-section Lafforgue
-
-variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
-  [Algebra A K] [IsFractionRing A K]
-variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
-variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
-variable (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop)
-variable (IsUnramAt : ∀ lam : CoeffPlace E,
-  LambdaAdicRep K Kbar E n lam → HeightOneSpectrum A → Prop)
-variable (Good : HeightOneSpectrum A → CoeffPlace E → Prop)
-
--- `K` is a global function field: the function field of a smooth projective
--- curve over the finite field `Fq`. Mathlib's `FunctionField Fq K` gives the
--- field-theoretic half; there is no curve attached to it in v4.28.0.
-variable (Fq : Type*) [Field Fq] [Finite Fq] [Algebra (RatFunc Fq) K]
-
-/-- **Deligne's conjecture for curves** (L. Lafforgue).
-
-Every continuous `λ`-adic representation of `G_K` unramified outside `S` is a
-member of a compatible family unramified outside `S`.
-
-Statement only: the proof is `sorry`. -/
-theorem exists_isCompatibleFamily_of_unramified
-    (hK : FunctionField Fq K)
-    (S : Finset (HeightOneSpectrum A))
-    (lam₀ : CoeffPlace E)
-    (hchar : ringChar (𝓞 E ⧸ lam₀.asIdeal) ≠ ringChar K)
-    (rho₀ : LambdaAdicRep K Kbar E n lam₀)
-    (hunram : ∀ v : HeightOneSpectrum A, v ∉ S → IsUnramAt lam₀ rho₀ v) :
-    ∃ rho : ∀ lam : CoeffPlace E, LambdaAdicRep K Kbar E n lam,
-      rho lam₀ = rho₀ ∧
-        IsCompatibleFamily A K Kbar E n IsFrobAt IsUnramAt Good S rho := by
-  sorry
-
-end Lafforgue
 
 end LambdaAdicSlice
 
 namespace LambdaAdicSlice
 
-section FrobeniusSystem
-
-variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
-  [Algebra A K] [IsFractionRing A K]
-variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
-variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
-
-/-- Characterising axioms for an abstract Frobenius predicate on `G_K`.
-
-Mathlib v4.28.0 cannot construct `Frob_v` in the absolute Galois group. The
-predicate `IsArithFrobAt` is available for a *monoid* acting on a ring — no
-finiteness required — but the action of `G_K` on the integral closure of `A`
-in `K̄` is not instantiated, so the predicate cannot be applied at that level.
-
-These are the properties the compatible-family definition actually depends on:
-a Frobenius exists at each place, and it is well defined up to conjugacy. -/
-structure IsFrobeniusSystem
-    (IsFrobAt : HeightOneSpectrum A → AbsGal K Kbar → Prop) : Prop where
-  /-- A Frobenius element exists at every finite place. -/
-  exists_frob : ∀ v : HeightOneSpectrum A, ∃ g, IsFrobAt v g
-  /-- Any two Frobenius elements at the same place are conjugate. -/
-  isConj_of : ∀ (v : HeightOneSpectrum A) (g g' : AbsGal K Kbar),
-    IsFrobAt v g → IsFrobAt v g' → IsConj g g'
-  /-- Frobenius elements at a place are closed under conjugation. -/
-  conj_mem : ∀ (v : HeightOneSpectrum A) (g x : AbsGal K Kbar),
-    IsFrobAt v g → IsFrobAt v (x * g * x⁻¹)
-
-end FrobeniusSystem
 
 section CharpolyConj
 
@@ -333,27 +205,57 @@ A definition, replacing the earlier `Good` parameter. -/
 def NotDividing (v : HeightOneSpectrum A) (lam : CoeffPlace E) : Prop :=
   ((resChar E lam : ℕ) : A) ∉ v.asIdeal
 
-/-- The inertia condition at a prime `Q` of the integral closure of `A` in `K̄`:
-`g` acts trivially on the residue field at `Q`. -/
-def IsInInertiaAt (Q : Ideal (IntClosure A Kbar)) (g : AbsGal K Kbar) : Prop :=
-  ∀ x : IntClosure A Kbar, g • x - x ∈ Q
-
-/-- A representation is **unramified at `v`** if for some prime `Q` above `v`
-the inertia at `Q` acts trivially.
-
-A definition, replacing the earlier `IsUnramAt` parameter. -/
-def IsUnramifiedAt {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam)
-    (v : HeightOneSpectrum A) : Prop :=
-  ∃ Q : Ideal (IntClosure A Kbar), Q.IsPrime ∧ Q.under A = v.asIdeal ∧
-    ∀ g : AbsGal K Kbar, IsInInertiaAt A K Kbar Q g → rho.toHom g = 1
-
 end ConcreteConditions
 
 end LambdaAdicSlice
 
 namespace LambdaAdicSlice
 
-section CompatibleFamilyConcrete
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section FrobeniusChoice
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+
+/-- A choice of Frobenius element at every finite place.
+
+Existence of Frobenius elements in the *absolute* Galois group is not available
+in Mathlib v4.28.0: `IsArithFrobAt.exists_of_isInvariant` requires a finite
+residue field at the chosen prime, which fails at `K̄`. Proving it needs the
+surjectivity of the decomposition group onto the residue Galois group together
+with an inverse-limit or Zorn argument over finite subextensions.
+
+Taking it as data rather than deriving it makes the assumption explicit and
+removes the vacuity that an unquantified `IsFrobAt v g → ...` would introduce. -/
+structure FrobeniusChoice where
+  /-- The chosen element at each place. -/
+  frob : HeightOneSpectrum A → AbsGal K Kbar
+  /-- It is a Frobenius element there. -/
+  isFrob : ∀ v, IsFrobAt A K Kbar v (frob v)
+
+end FrobeniusChoice
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section VacuityFree
 
 variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
   [Algebra A K] [IsFractionRing A K]
@@ -361,14 +263,25 @@ variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
   [Algebra A Kbar] [IsScalarTower A K Kbar]
 variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
 
-/-- A **compatible family unramified outside `S`**, with every condition given
-by a definition rather than an assumed predicate.
+/-- A representation is **unramified at `v`** if inertia acts trivially at
+*every* prime above `v`.
 
-This is the intended statement. It differs from `IsCompatibleFamily` only in
-that `IsFrobAt`, `IsUnramifiedAt` and `NotDividing` are the concrete notions
-defined above, so the statement is about actual Frobenius elements rather than
-an arbitrary relation. -/
-structure IsCompatibleFamily'
+Quantifying over all `Q` rather than one avoids having to prove transitivity of
+the Galois action on primes above `v` before each use. The two readings agree
+mathematically, since primes above `v` are conjugate and `ker ρ` is normal. -/
+def IsUnramifiedAt {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam)
+    (v : HeightOneSpectrum A) : Prop :=
+  ∀ Q : Ideal (IntClosure A Kbar), Q.IsPrime → Q.under A = v.asIdeal →
+    ∀ g : AbsGal K Kbar, g ∈ Q.inertia (AbsGal K Kbar) → rho.toHom g = 1
+
+/-- A **compatible family unramified outside `S`**, relative to a chosen
+Frobenius at each place.
+
+Evaluating at `Frob.frob v` rather than quantifying over all `g` with
+`IsFrobAt v g` removes the vacuity: an implication `IsFrobAt v g → …` says
+nothing if no Frobenius element is known to exist. -/
+structure IsCompatibleFamily
+    (Frob : FrobeniusChoice A K Kbar)
     (S : Finset (HeightOneSpectrum A))
     (rho : ∀ lam : CoeffPlace E, LambdaAdicRep K Kbar E n lam) : Prop where
   /-- Each `ρ_λ` is unramified at every `v ∉ S` with `v ∤ ℓ(λ)`. -/
@@ -377,11 +290,146 @@ structure IsCompatibleFamily'
   /-- For `v ∉ S`, the characteristic polynomial of `ρ_λ(Frob_v)` is the image
   of a polynomial over `E` not depending on `λ`. -/
   charpoly : ∀ v : HeightOneSpectrum A, v ∉ S →
-    ∃ P : E[X], ∀ (lam : CoeffPlace E) (g : AbsGal K Kbar),
-      NotDividing A E v lam → IsFrobAt A K Kbar v g →
-        ((rho lam).toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly
-          = P.map (algebraMap E (Completion E lam))
+    ∃ P : E[X], ∀ lam : CoeffPlace E, NotDividing A E v lam →
+      ((rho lam).toHom (Frob.frob v) :
+          Matrix (Fin n) (Fin n) (Completion E lam)).charpoly
+        = P.map (algebraMap E (Completion E lam))
 
-end CompatibleFamilyConcrete
+end VacuityFree
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section LafforgueHypotheses
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+/-- The determinant of `ρ` has finite order. -/
+def DetFiniteOrder {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam) : Prop :=
+  ∃ N : ℕ, 0 < N ∧ ∀ g : AbsGal K Kbar,
+    ((rho.toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).det) ^ N = 1
+
+/-- `ρ` has no invariant subspace other than `⊥` and `⊤`.
+
+This is irreducibility over `E_λ`. The hypothesis in Lafforgue's theorem is
+*absolute* irreducibility, i.e. irreducibility after base change to an algebraic
+closure of `E_λ`; that base change is not formalised here. -/
+def IsIrred {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam) : Prop :=
+  ∀ W : Submodule (Completion E lam) (Fin n → Completion E lam),
+    (∀ g : AbsGal K Kbar, ∀ w ∈ W,
+        (rho.toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).mulVec w ∈ W) →
+      W = ⊥ ∨ W = ⊤
+
+/-- The Frobenius characteristic polynomials of `ρ` at places outside `S` have
+coefficients in `E`.
+
+Without this the conclusion of the companion theorem cannot hold: an unramified
+rank-one character of the constant-field quotient can have Frobenius eigenvalues
+outside `E`. -/
+def FrobCharpolyRational {lam : CoeffPlace E} (Frob : FrobeniusChoice A K Kbar)
+    (S : Finset (HeightOneSpectrum A)) (rho : LambdaAdicRep K Kbar E n lam) : Prop :=
+  ∀ v : HeightOneSpectrum A, v ∉ S → ∃ P : E[X],
+    ((rho.toHom (Frob.frob v) : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly)
+      = P.map (algebraMap E (Completion E lam))
+
+end LafforgueHypotheses
+
+section LafforgueCorrected
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+variable (Fq : Type*) [Field Fq] [Finite Fq] [Algebra (RatFunc Fq) K]
+
+/-- **Lafforgue's companion theorem**, with the hypotheses required for the
+statement to be true.
+
+An earlier version of this file stated the conclusion for *every* continuous
+representation unramified outside `S`. That is false: a rank-one unramified
+character of the constant-field quotient can have Frobenius eigenvalues outside
+`E`. Irreducibility, finite-order determinant, and `E`-rationality of the
+Frobenius characteristic polynomials are all needed.
+
+Known gaps, deliberately not formalised: absolute irreducibility (`IsIrred` is
+irreducibility over `E_λ`); the coefficient-field descent, so that the companions
+land in `E_λ` rather than in finite extensions of it (this is Chin's theorem, not
+Lafforgue's); and `HeightOneSpectrum A` indexes the closed points of an affine
+model, omitting the places at infinity of the projective curve.
+
+Statement only: the proof is `sorry`. -/
+theorem exists_isCompatibleFamily''_of_irreducible
+    (hK : FunctionField Fq K)
+    (hn : 0 < n)
+    (Frob : FrobeniusChoice A K Kbar)
+    (S : Finset (HeightOneSpectrum A))
+    (lam₀ : CoeffPlace E)
+    (hchar : resChar E lam₀ ≠ ringChar K)
+    (rho₀ : LambdaAdicRep K Kbar E n lam₀)
+    (hirred : IsIrred K Kbar E n rho₀)
+    (hdet : DetFiniteOrder K Kbar E n rho₀)
+    (hunram : ∀ v : HeightOneSpectrum A, v ∉ S →
+      IsUnramifiedAt A K Kbar E n rho₀ v)
+    (hrat : FrobCharpolyRational A K Kbar E n Frob S rho₀) :
+    ∃ rho : ∀ lam : CoeffPlace E, LambdaAdicRep K Kbar E n lam,
+      rho lam₀ = rho₀ ∧ IsCompatibleFamily A K Kbar E n Frob S rho := by
+  sorry
+
+end LafforgueCorrected
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section InertiaCorrect
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+omit [IsDedekindDomain A] [IsFractionRing A K] [IsAlgClosure K Kbar] in
+/-- **Frobenius independence at a fixed prime.**
+
+If `ρ` is unramified at `v` and `g`, `g'` are both Frobenius elements at the
+same prime `Q` above `v`, then `ρ g = ρ g'`.
+
+This is the correct well-definedness argument, and it runs through *inertia*,
+not conjugacy: `IsArithFrobAt.mul_inv_mem_inertia` gives `g * g'⁻¹ ∈ inertia Q`,
+which `ρ` kills. An earlier version of this file asserted instead that any two
+Frobenius elements at a place are conjugate — that is false. -/
+theorem toHom_eq_of_isArithFrobAt {lam : CoeffPlace E}
+    (rho : LambdaAdicRep K Kbar E n lam) {v : HeightOneSpectrum A}
+    (hunram : IsUnramifiedAt A K Kbar E n rho v)
+    {Q : Ideal (IntClosure A Kbar)} (hQp : Q.IsPrime) (hQu : Q.under A = v.asIdeal)
+    {g g' : AbsGal K Kbar}
+    (hg : IsArithFrobAt A g Q) (hg' : IsArithFrobAt A g' Q) :
+    rho.toHom g = rho.toHom g' := by
+  have hmem : g * g'⁻¹ ∈ Q.inertia (AbsGal K Kbar) := hg.mul_inv_mem_inertia hg'
+  have h1 : rho.toHom (g * g'⁻¹) = 1 := hunram Q hQp hQu _ hmem
+  rw [map_mul, map_inv] at h1
+  exact mul_inv_eq_one.mp h1
+
+omit [IsDedekindDomain A] [IsFractionRing A K] [IsAlgClosure K Kbar] in
+/-- The characteristic polynomial of `ρ_λ(Frob_v)` is independent of the choice
+of Frobenius element at a fixed prime above `v`. -/
+theorem charpoly_eq_of_isArithFrobAt {lam : CoeffPlace E}
+    (rho : LambdaAdicRep K Kbar E n lam) {v : HeightOneSpectrum A}
+    (hunram : IsUnramifiedAt A K Kbar E n rho v)
+    {Q : Ideal (IntClosure A Kbar)} (hQp : Q.IsPrime) (hQu : Q.under A = v.asIdeal)
+    {g g' : AbsGal K Kbar}
+    (hg : IsArithFrobAt A g Q) (hg' : IsArithFrobAt A g' Q) :
+    (rho.toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly
+      = (rho.toHom g' : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly := by
+  rw [toHom_eq_of_isArithFrobAt A K Kbar E n rho hunram hQp hQu hg hg']
+
+end InertiaCorrect
 
 end LambdaAdicSlice
