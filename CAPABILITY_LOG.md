@@ -74,3 +74,54 @@ project. It found four substantive errors, all of which compiled cleanly:
 - [AI] Claude — self-assessment — UNRELIABLE. Proposed sanity checks that were real but insufficient (`#print axioms` confirms proofs avoid `sorry`; it says nothing about whether definitions are vacuous or statements are true).
 - [AI] independent review — DECISIVE. A model with no investment in the prior choices found in one pass what iteration had not. The practical lesson: for formalisation, an adversarial reader is not optional quality assurance, it is the only check on the step that type-checking cannot see — whether the formal statement means the informal one.
 - [AI] Aristotle — see session 1. Sandbox-side actions were narrated as if performed on the caller's repository.
+
+## 11-08-2026 — second independent review
+
+**Findings.** The main theorem, already repaired once, was still stronger than
+Lafforgue's theorem in two independent ways, both filed in the README as
+"limitations": the conclusion placed companions over `E_λ` itself, and the
+irreducibility hypothesis was irreducibility over `E_λ` rather than absolute
+irreducibility — a weaker hypothesis, hence a stronger theorem. `A` was an
+arbitrary Dedekind domain with `Frac A = K`, unconnected to `𝔽_q`; for `A` a
+DVR or a field, `HeightOneSpectrum A` is a single point or empty and the
+conclusion is satisfiable by an everywhere-unramified companion-matrix
+construction. A docstring on `charpoly_eq_of_isConj` still asserted the
+well-definedness claim the first review had rejected, and still cited
+`IsFrobeniusSystem.isConj_of`, an axiom deleted in that same round.
+
+**Failure mode.** The first round's fixes were applied where the reviewer
+pointed, not systematically. Code and documentation drifted apart, and the
+surviving false claim was in the documentation. `lake build` and `#print axioms`
+were both clean throughout.
+
+**Repairs.** `exists_companion` replaces the old theorem, stated pointwise in
+`λ`, with the companion over a bundled finite extension `M/E_λ` carrying the
+module topology. `A` is now a finite-type `𝔽_q`-algebra with scalar towers to
+`K`. `SpanFull` gives absolute irreducibility with no algebraic closure. The
+Frobenius polynomials `P` are data, which ties the companion to `ρ₀` and lets
+the type-inappropriate clause `ρ_{λ₀} = ρ₀` be dropped.
+
+**Mathlib facts established by reading source, not by guessing.**
+- `IsArithFrobAt` is `∀ x, σ • x - x ^ Nat.card (R ⧸ Q.under R) ∈ Q`. If the base
+  residue ring is infinite the cardinal is `0` and the congruence at `x = 0`
+  forces `Q = ⊤`, contradicting primality (`AlgHom.IsArithFrobAt.finite_quotient`).
+  So the definition self-protects against a `q = 0` degeneracy, at the cost of
+  making `FrobeniusChoice` uninhabited when a residue field is infinite.
+- `IsArithFrobAt.conj` and `IsArithFrobAt.mul_inv_mem_inertia` require no
+  finiteness; only `exists_of_isInvariant` does.
+- `IsModuleTopology` exists in v4.28.0
+  (`Mathlib/Topology/Algebra/Module/ModuleTopology.lean`, Buzzard–Sawin). This is
+  what makes the finite-extension coefficient field expressible: the topology on
+  `M` is pinned rather than supplied as arbitrary data, so `Continuous` on the
+  companion means something.
+
+**Literature check.** Drinfeld, arXiv:1007.4004, §1.1–1.2: Theorem 1.1 produces a
+lisse sheaf over an algebraic closure of `E_λ`, and the curve case is Lafforgue's
+Theorem VII.6. Deligne's Conjecture 1.3(b) asks for a lisse `E_λ`-sheaf only
+after possibly enlarging `E`, and Drinfeld attributes the passage from `Ē_λ` to
+`E_λ` to Chin, Adv. Math. 180 (2003) — not to Lafforgue, and not to Chin's later
+monodromy-group paper.
+
+**Unchanged.** The W30 candidate remains "Frobenius elements exist in the
+absolute Galois group": genuinely missing, self-contained, and a plausible
+Mathlib PR.
