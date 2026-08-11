@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 Suvir Rathore. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Suvir Rathore
+-/
+/-
 Statement-level formalisation: compatible families of λ-adic Galois
 representations, and the statement of Lafforgue's companion theorem for curves.
 
@@ -74,7 +79,7 @@ omit [IsAlgClosure K Kbar] in
 /-- The characteristic polynomial of `ρ(g)` depends only on the conjugacy class
 of `g`.
 
-This is **not** the well-definedness fact behind the compatible-family
+This is not the well-definedness fact behind the compatible-family
 condition. Two Frobenius elements at the same place need not be conjugate: they
 differ by an element of inertia. The correct argument is
 `toHom_eq_of_isArithFrobAt` below, which runs through `Ideal.inertia`. An
@@ -104,7 +109,7 @@ abbrev IntClosure := integralClosure A Kbar
 
 /-- `G_K` acts on the integral closure of `A` in `K̄`.
 
-This instance is **not** in Mathlib v4.28.0 and is the missing link that
+This instance is not in Mathlib v4.28.0 and is the missing link that
 prevents `IsArithFrobAt` from being applied to the absolute Galois group. -/
 instance instMulSemiringActionIntClosure :
     MulSemiringAction (AbsGal K Kbar) (IntClosure A Kbar) where
@@ -255,7 +260,7 @@ Evaluating at `Frob.frob v` rather than quantifying over all `g` with
 `IsFrobAt v g` removes the vacuity: an implication `IsFrobAt v g → …` says
 nothing if no Frobenius element is known to exist.
 
-This is a legitimate notion, but it is **not** what the companion theorem
+This is a legitimate notion, but it is not what the companion theorem
 produces: Lafforgue's companions land in finite extensions of `E_λ`, not in
 `E_λ`. See `exists_companion` and `CompanionRep`. -/
 structure IsCompatibleFamily
@@ -292,7 +297,7 @@ section AbsoluteConditions
 
 /-- The image of `ρ` spans the full matrix algebra.
 
-For `R` a **field** and `m ≥ 1` this is **absolute irreducibility**, stated with
+For `R` a field and `m ≥ 1` this is absolute irreducibility, stated with
 no algebraic closure anywhere. The image contains `1` and is closed under
 multiplication, so its `R`-linear span is already an `R`-subalgebra. If that
 span is all of `M_m(R)` then it stays so

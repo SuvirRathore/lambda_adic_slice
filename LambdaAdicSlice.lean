@@ -1,1 +1,1 @@
-import LambdaAdicSlice.Basic
+import LambdaAdicSlice.Companions
