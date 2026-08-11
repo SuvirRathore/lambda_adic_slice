@@ -364,7 +364,7 @@ Lafforgue's); and `HeightOneSpectrum A` indexes the closed points of an affine
 model, omitting the places at infinity of the projective curve.
 
 Statement only: the proof is `sorry`. -/
-theorem exists_isCompatibleFamily''_of_irreducible
+theorem exists_isCompatibleFamily_of_irreducible
     (hK : FunctionField Fq K)
     (hn : 0 < n)
     (Frob : FrobeniusChoice A K Kbar)
