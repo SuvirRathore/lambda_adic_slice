@@ -313,3 +313,75 @@ theorem isFrobAt_conj {v : HeightOneSpectrum A} {g x : AbsGal K Kbar}
 end FrobeniusProperties
 
 end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section ConcreteConditions
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+/-- The residue characteristic `ℓ(λ)` of a finite place of `E`. -/
+noncomputable def resChar (lam : CoeffPlace E) : ℕ := ringChar (𝓞 E ⧸ lam.asIdeal)
+
+/-- `v ∤ ℓ(λ)`: the residue characteristic of `λ` is not in the prime `v`.
+
+A definition, replacing the earlier `Good` parameter. -/
+def NotDividing (v : HeightOneSpectrum A) (lam : CoeffPlace E) : Prop :=
+  ((resChar E lam : ℕ) : A) ∉ v.asIdeal
+
+/-- The inertia condition at a prime `Q` of the integral closure of `A` in `K̄`:
+`g` acts trivially on the residue field at `Q`. -/
+def IsInInertiaAt (Q : Ideal (IntClosure A Kbar)) (g : AbsGal K Kbar) : Prop :=
+  ∀ x : IntClosure A Kbar, g • x - x ∈ Q
+
+/-- A representation is **unramified at `v`** if for some prime `Q` above `v`
+the inertia at `Q` acts trivially.
+
+A definition, replacing the earlier `IsUnramAt` parameter. -/
+def IsUnramifiedAt {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam)
+    (v : HeightOneSpectrum A) : Prop :=
+  ∃ Q : Ideal (IntClosure A Kbar), Q.IsPrime ∧ Q.under A = v.asIdeal ∧
+    ∀ g : AbsGal K Kbar, IsInInertiaAt A K Kbar Q g → rho.toHom g = 1
+
+end ConcreteConditions
+
+end LambdaAdicSlice
+
+namespace LambdaAdicSlice
+
+section CompatibleFamilyConcrete
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+/-- A **compatible family unramified outside `S`**, with every condition given
+by a definition rather than an assumed predicate.
+
+This is the intended statement. It differs from `IsCompatibleFamily` only in
+that `IsFrobAt`, `IsUnramifiedAt` and `NotDividing` are the concrete notions
+defined above, so the statement is about actual Frobenius elements rather than
+an arbitrary relation. -/
+structure IsCompatibleFamily'
+    (S : Finset (HeightOneSpectrum A))
+    (rho : ∀ lam : CoeffPlace E, LambdaAdicRep K Kbar E n lam) : Prop where
+  /-- Each `ρ_λ` is unramified at every `v ∉ S` with `v ∤ ℓ(λ)`. -/
+  unramified : ∀ (lam : CoeffPlace E) (v : HeightOneSpectrum A),
+    v ∉ S → NotDividing A E v lam → IsUnramifiedAt A K Kbar E n (rho lam) v
+  /-- For `v ∉ S`, the characteristic polynomial of `ρ_λ(Frob_v)` is the image
+  of a polynomial over `E` not depending on `λ`. -/
+  charpoly : ∀ v : HeightOneSpectrum A, v ∉ S →
+    ∃ P : E[X], ∀ (lam : CoeffPlace E) (g : AbsGal K Kbar),
+      NotDividing A E v lam → IsFrobAt A K Kbar v g →
+        ((rho lam).toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly
+          = P.map (algebraMap E (Completion E lam))
+
+end CompatibleFamilyConcrete
+
+end LambdaAdicSlice
