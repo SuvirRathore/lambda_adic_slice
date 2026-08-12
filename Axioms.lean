@@ -1,7 +1,7 @@
 /-
 Machine-checked attestation of the axiom profile. `lake env lean Axioms.lean`
 fails if any proved lemma acquires an axiom dependency, or if the companion
-theorem stops depending on `sorryAx` — that is, if the single deliberate `sorry`
+theorems stop depending on `sorryAx` — that is, if the single deliberate `sorry`
 silently moves or multiplies. Run in CI.
 -/
 import LambdaAdicSlice.Companions
@@ -35,3 +35,8 @@ import LambdaAdicSlice.Companions
 [propext, sorryAx, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms LambdaAdicSlice.exists_companion
+
+/-- info: 'LambdaAdicSlice.exists_companion_family' depends on axioms:
+[propext, sorryAx, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms LambdaAdicSlice.exists_companion_family

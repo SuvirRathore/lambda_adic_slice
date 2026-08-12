@@ -21,9 +21,14 @@ namespace LambdaAdicSlice
 
 section Setup
 
--- `A` is a Dedekind domain with fraction field `K`; the finite places of `K`
--- are the height-one primes of `A`. This covers number fields (`A = 𝓞 K`) and
--- function fields of curves over finite fields alike.
+-- `A` is a Dedekind domain with fraction field `K`. Its height-one primes are the
+-- places carried by the chosen model: for `A = 𝓞 K` they are the finite places of
+-- a number field, and for a finite-type Dedekind model of a function field they
+-- are the closed points of the corresponding affine curve, hence all but finitely
+-- many places of the proper curve. For an arbitrary Dedekind subring they are
+-- neither, since Mathlib's `IsDedekindDomain` admits localisations, discrete
+-- valuation rings and fields. `exists_companion` imposes the finite-type
+-- hypothesis that pins this down.
 variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
   [Algebra A K] [IsFractionRing A K]
 
@@ -80,8 +85,9 @@ omit [IsAlgClosure K Kbar] in
 of `g`.
 
 This is not the well-definedness fact behind the compatible-family
-condition. Two Frobenius elements at the same place need not be conjugate: they
-differ by an element of inertia. The correct argument is
+condition. Two Frobenius elements at the same prime `Q` above a place need not be
+conjugate: they differ by an element of the inertia at `Q`. Across different
+primes above one place, a conjugation moves the prime first. The correct argument is
 `toHom_eq_of_isArithFrobAt` below, which runs through `Ideal.inertia`. An
 earlier version of this file asserted the conjugacy statement as an axiom and
 described this lemma as establishing well-definedness; both were wrong. -/
@@ -319,10 +325,10 @@ into `GL_n(M)` for some finite extension `M` of `E_λ`, carrying the `E_λ`-modu
 topology.
 
 The coefficient field is bundled because Lafforgue's theorem does not produce
-companions over `E_λ` itself — it produces them over an algebraic closure, and
-descent to `E_λ` for a *fixed* `E` is false in general (a Schur-index obstruction
-in `Br(E_λ)`). Descent to a finite extension is elementary; descent to `E_λ`
-after enlarging `E` is Chin's theorem and is not formalised here.
+companions over `E_λ` itself. Theorem VII.6(v) states the companion over a finite
+extension of `E_λ`, and the obstruction to descending further for a fixed `E` is
+the class of a central simple algebra, which Lafforgue's own proof works with.
+Removing it by enlarging `E` is Chin's theorem, and is not formalised here.
 
 The topology is pinned by `IsModuleTopology`, not left arbitrary: an unspecified
 topology would make `Continuous` meaningless. -/
@@ -353,7 +359,15 @@ variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
   [Algebra A Kbar] [IsScalarTower A K Kbar]
 variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
 
-/-- **Lafforgue's companion theorem for curves**, stated one place `λ` at a time.
+/-- The finite-extension companion-existence consequence of Lafforgue's Theorem
+VII.6(v), after fixing the coefficient field `E` and an `E_{λ₀}`-model, stated one
+place `λ` at a time.
+
+This is a slice of VII.6, not the whole of it. VII.6 begins from an irreducible
+lisse sheaf of finite-order determinant and constructs `E` and the polynomials
+`P_v`; here both are supplied as data. VII.6 also proves purity, integrality of
+the Frobenius roots, and a further descent statement, none of which is
+formalised.
 
 `A` is a finite-type Dedekind `𝔽_q`-algebra with fraction field the function
 field `K`, so `Spec A` is a smooth affine curve over `𝔽_q` and its closed points
@@ -373,9 +387,11 @@ varies).
 Conclusion: a companion over a finite extension of `E_λ`, unramified outside `S`,
 with the same `P v`, itself absolutely irreducible with finite-order determinant.
 
-Deliberately not formalised: `HeightOneSpectrum A` omits the places of the proper
-curve outside `Spec A`, so "unramified outside `S`" does not constrain those; and
-there is no claim that the coefficient field can be taken to be `E_λ`.
+The curve here is the smooth affine `U = Spec A` with `S` removed, to which
+VII.6 applies directly. The places of a proper model lying outside `Spec A` are
+not points of `U`, so nothing is claimed about them; that is a statement of scope,
+not a shortfall. What is deliberately not formalised is any descent of the
+coefficient field to `E_λ`.
 
 Statement only: the proof is `sorry`. -/
 theorem exists_companion
@@ -411,6 +427,62 @@ theorem exists_companion
   sorry
 
 end Companions
+
+section CompanionFamily
+
+variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
+  [Algebra A K] [IsFractionRing A K]
+  [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
+  [Algebra A Kbar] [IsScalarTower A K Kbar]
+variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
+
+/-- The whole family of companions, one for each finite place of `E` away from
+the characteristic, obtained from `exists_companion` by choice.
+
+Same hypotheses as `exists_companion` with the target place removed. The choice
+function assigns to each `λ` with `ℓ(λ) ≠ char K` a companion over its own finite
+extension of `E_λ`, all of them matching the one family of polynomials `P`. This
+is the Lean form of the statement that a family indexed by all `λ` follows from
+the one-place-at-a-time version; it is proved, not assumed, but inherits the
+`sorry` of `exists_companion`. -/
+theorem exists_companion_family
+    {Fq : Type*} [Field Fq] [Finite Fq]
+    [Algebra Fq A] [Algebra Fq K] [IsScalarTower Fq A K] [Algebra.FiniteType Fq A]
+    [Algebra (RatFunc Fq) K] [IsScalarTower Fq (RatFunc Fq) K]
+    (hK : FunctionField Fq K)
+    (hn : 0 < n)
+    (Frob : FrobeniusChoice A K Kbar)
+    (S : Finset (HeightOneSpectrum A))
+    (P : HeightOneSpectrum A → E[X])
+    {lam₀ : CoeffPlace E} (hchar₀ : resChar E lam₀ ≠ ringChar K)
+    (rho₀ : LambdaAdicRep K Kbar E n lam₀)
+    (hspan : SpanFull rho₀.toHom)
+    (hdet : DetFiniteOrderHom rho₀.toHom)
+    (hunram : ∀ v : HeightOneSpectrum A, v ∉ S →
+      IsUnramifiedAt A K Kbar E n rho₀ v)
+    (hrat : ∀ v : HeightOneSpectrum A, v ∉ S →
+      (rho₀.toHom (Frob.frob v) :
+          Matrix (Fin n) (Fin n) (Completion E lam₀)).charpoly
+        = (P v).map (algebraMap E (Completion E lam₀))) :
+    ∃ F : ∀ lam : CoeffPlace E, resChar E lam ≠ ringChar K →
+        CompanionRep K Kbar E n lam,
+      ∀ (lam : CoeffPlace E) (h : resChar E lam ≠ ringChar K),
+        (∀ v : HeightOneSpectrum A, v ∉ S →
+            ∀ Q : Ideal (IntClosure A Kbar), Q.IsPrime → Q.under A = v.asIdeal →
+              ∀ g : AbsGal K Kbar, g ∈ Q.inertia (AbsGal K Kbar) →
+                (F lam h).toHom g = 1) ∧
+        (∀ v : HeightOneSpectrum A, v ∉ S →
+            ((F lam h).toHom (Frob.frob v) :
+                Matrix (Fin n) (Fin n) (F lam h).M).charpoly
+              = (P v).map ((algebraMap (Completion E lam) (F lam h).M).comp
+                  (algebraMap E (Completion E lam)))) ∧
+        SpanFull (F lam h).toHom ∧ DetFiniteOrderHom (F lam h).toHom := by
+  choose F hF using fun (lam : CoeffPlace E) (h : resChar E lam ≠ ringChar K) =>
+    exists_companion A K Kbar E n hK hn Frob S P hchar₀ rho₀ hspan hdet hunram
+      hrat lam h
+  exact ⟨F, hF⟩
+
+end CompanionFamily
 
 section InertiaCorrect
 
