@@ -95,11 +95,11 @@ argument runs through inertia, since `IsArithFrobAt.mul_inv_mem_inertia` gives
 polynomials.
 
 `IsFrobAt` is a definition, not an axiom. It is built on Mathlib's
-`IsArithFrobAt` via a `MulSemiringAction` of `G_K` on the integral closure of `A`
-in `K̄`. That instance is not in Mathlib and is supplied here; it is the only
-obstruction to defining arithmetic Frobenius at the infinite level, since
-`IsArithFrobAt` is already stated for monoid actions and needs no finiteness.
-Existence is a separate matter, treated under Limitations.
+`IsArithFrobAt` via the action of `G_K` on the integral closure of `A` in `K̄`,
+which Mathlib supplies, as it does the `SMulCommClass` that action needs. Nothing
+obstructs defining arithmetic Frobenius at the infinite level, since
+`IsArithFrobAt` is stated for monoid actions and needs no finiteness. Existence
+of Frobenius elements is a separate matter, treated under Limitations.
 
 ## Absolute irreducibility without algebraic closures
 
@@ -167,8 +167,11 @@ The main theorem is `sorry`. Formalising the proof is not in scope.
 
 The slice is stated via `G_K` with an unramified-outside-`S` condition rather
 than via `π₁^ét(X ∖ S)`. Mathlib v4.28.0 has a complete abstract Galois-category
-development in `Mathlib/CategoryTheory/Galois/`, but the finite étale site of a
-scheme is not instantiated as a Galois category, so no `π₁^ét(X)` is available.
+development in `Mathlib/CategoryTheory/Galois/`, whose only worked instance is
+the category of finite `G`-sets, and it has the big étale site as a Grothendieck
+topology on schemes in `AlgebraicGeometry/Sites/Etale.lean`. What is missing is
+the link between the two: the finite étale site of a scheme is not instantiated
+as a Galois category, so no `π₁^ét(X)` is available.
 
 ## Correctness
 

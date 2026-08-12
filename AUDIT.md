@@ -9,8 +9,8 @@ are not machine-checked.
 ## Mathlib v4.28.0
 
 Everything below was verified by reading source at the pinned tag rather than
-from recall. Guessing a lemma's behaviour produced a wrong survey verdict early
-on, so nothing here is asserted from memory.
+from recall, claims of absence included. Those are the easiest kind to leave
+unchecked, and both kinds have been got wrong here at least once; see below.
 
 Available: `krullTopology` on `Gal(L/K)`; `IsDedekindDomain.HeightOneSpectrum`
 and `.adicCompletion`; `GL`; `Matrix.charpoly` and `Matrix.charpoly_units_conj`;
@@ -19,18 +19,23 @@ with `SMulCommClass` and needs no finiteness; `Ideal.inertia`;
 `IsArithFrobAt.mul_inv_mem_inertia`; `IsArithFrobAt.conj`;
 `Topology/Algebra/Module/ModuleTopology.lean`, which is what makes a coefficient
 field finite over `E_λ` expressible with a pinned rather than an arbitrary
-topology; `Algebra.FiniteType`; and `CategoryTheory/Galois/` as an abstract
-development.
+topology; `Algebra.FiniteType`; the `MulSemiringAction` of a group on
+`integralClosure R K` together with its `SMulCommClass`, in
+`RingTheory/IntegralClosure/Algebra/Basic.lean`, which with
+`AlgEquiv.applyMulSemiringAction` and `AlgEquiv.apply_smulCommClass'` give the
+action of `G_K` on the integral closure with nothing to supply by hand; and
+`CategoryTheory/Galois/` as an abstract development.
 
 Partial: `NumberTheory/FunctionField.lean` gives the predicate and the valuations
 but no tie-in to a curve. Unramifiedness predicates exist, but nothing for a
 representation.
 
-Missing: `π₁^ét(X)` for schemes, since the Galois-category development is
-abstract and the finite étale site is not instantiated as one. This decided the
-`G_K`-based formulation. Chebotarev density is absent entirely, as is
-characteristic-polynomial coefficient descent to `E`. The `MulSemiringAction` of
-`G_K` on the integral closure is supplied here.
+Missing: `π₁^ét(X)` for schemes. The Galois-category development is abstract,
+with finite `G`-sets as its only worked instance, and although the big étale site
+exists as a Grothendieck topology on schemes, the finite étale site is not
+instantiated as a Galois category. This decided the `G_K`-based formulation.
+Chebotarev density is absent entirely, as is characteristic-polynomial
+coefficient descent to `E`.
 
 Three facts about the Frobenius API constrain the design.
 
@@ -96,6 +101,17 @@ without its scope, which is a field and `n ≥ 1`.
 Two smaller defects: `n : ℕ` admitted `n = 0`, and unramifiedness quantified over
 one prime above a place where every prime is wanted.
 
+One error was not about the mathematics at all. An action of `G_K` on the
+integral closure of `A` in `K̄`, and the `SMulCommClass` accompanying it, were
+written by hand and documented in three places as absent from Mathlib and
+supplied here. Both are in Mathlib v4.28.0, in the general form a maintainer
+would ask for, and both resolve in this file's own context without help, so the
+hand-written versions were shadowing them. The claim came from an early survey
+and was repeated without reading the source. It survived every review, because a
+claim that something is missing from a library is not a mathematical claim and
+nothing in the reviews was aimed at that kind of claim. The instances are deleted
+and the file builds on Mathlib's.
+
 ## Why the unramifiedness hypothesis is not redundant
 
 It is tempting to drop it. Continuity forces the image into a compact subgroup of
@@ -117,10 +133,8 @@ is stated here.
 ## What is not machine-checked
 
 Compile status and the axiom profile are checked in CI; see `Axioms.lean` and
-`.github/workflows/build.yml`. An instance diamond on the supplied
-`MulSemiringAction` is excluded only insofar as the build succeeds; no competing
-instance exists in Mathlib v4.28.0, where the ramification files take such
-actions as hypotheses.
+`.github/workflows/build.yml`. No instances are declared here, so the instance
+diamond an earlier version created no longer arises.
 
 Lafforgue's Theorem VII.6 and Deligne's Conjecture 1.2.10 were verified through
 Drinfeld's verbatim quotations and bibliography rather than the originals. The
