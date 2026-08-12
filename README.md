@@ -25,7 +25,7 @@ with fraction field `K`, so that `Spec A` is a smooth affine curve over `𝔽_q`
 the height-one primes of `A` are its closed points, all but finitely many of the
 places of `K`; a number field `E` of coefficients, with `λ` ranging over its
 finite places, completion `E_λ` and residue characteristic `ℓ(λ)`; a finite set
-`S` of places of `A`; an integer `n ≥ 1`; and a choice of Frobenius element
+`S` of places of `A`; an integer `n`; and a choice of Frobenius element
 `Frob_v ∈ G_K` at each place `v`.
 
 A family `(ρ_λ)` of continuous homomorphisms `ρ_λ : G_K → GL_n(E_λ)` is a
@@ -35,8 +35,8 @@ representation `ρ_λ` is unramified at `v` and the characteristic polynomial of
 `ρ_λ(Frob_v)` is the image of `P_v`. The polynomial is chosen before `λ`, not
 after; that quantifier order is the content of the definition.
 
-The companion theorem, as formalised here, reads as follows. Let `ℓ(λ₀) ≠ p` and
-let `ρ₀ : G_K → GL_n(E_{λ₀})` be continuous, absolutely irreducible, of
+The companion theorem, as formalised here, reads as follows. Let `n ≥ 1` and
+`ℓ(λ₀) ≠ p`, and let `ρ₀ : G_K → GL_n(E_{λ₀})` be continuous, absolutely irreducible, of
 finite-order determinant, unramified at every `v ∉ S`, and such that the
 characteristic polynomial of `ρ₀(Frob_v)` is the image of `P_v` for a fixed
 family `P_v ∈ E[T]`. Then for every finite place `λ` of `E` with `ℓ(λ) ≠ p` there
@@ -50,8 +50,10 @@ follows by choice, and `exists_companion_family` is that derivation.
 
 This is the companion-existence part of Lafforgue's Theorem VII.6(v), not the
 whole of VII.6. VII.6 starts from an irreducible lisse sheaf with finite-order
-determinant and constructs `E` and the `P_v`, which are hypotheses here; it also
-proves purity, integrality, and a further descent statement about `(σ_λ)^r`. In
+determinant and constructs `E` and the `P_v`, which are hypotheses here; it also proves
+purity, unit-ness of the Frobenius roots away from `p` with slope bounds at the
+places over `p`, and a further statement descending the `n`-th power of the
+companion to `E_λ` itself. In
 the other direction, the curve here is the affine `Spec A` with `S` removed,
 where VII.6 treats a smooth curve as an open subscheme of a projective one.
 
@@ -72,9 +74,11 @@ the companion factors, the trace is continuous and conjugacy-invariant, and `E_�
 is closed in `M`. So `[M : E_λ] = n!` suffices, and is not claimed minimal.
 
 Drinfeld's Theorem 1.1 carries a hypothesis that the roots of the characteristic
-polynomials are `λ`-adic units. For curves that is a consequence of absolute
-irreducibility and finite-order determinant rather than an extra assumption, so
-nothing has been dropped, but the mechanism is not purity. Being a unit away from
+polynomials are `λ`-adic units. For curves that is a consequence rather than an
+extra assumption: unramifiedness on the curve makes the representation a lisse
+sheaf there, and Lafforgue proves unit-ness for an irreducible lisse sheaf with
+finite-order determinant. Nothing has been dropped, and the mechanism is not
+purity. Being a unit away from
 `p` is part (iii) of Deligne's Conjecture 1.2.10, where the label (c) is
 Drinfeld's numbering in his abbreviated restatement rather than Deligne's. It is
 a conclusion separate from the weight condition, which is part (i) there, and for
@@ -171,7 +175,10 @@ here.
 
 `HeightOneSpectrum A` indexes an affine model, which is a statement of scope
 rather than a shortfall: `U = Spec A` with `S` removed is a smooth affine curve
-and Lafforgue's theorem applies to it directly. What follows from it is that the
+and Lafforgue's theorem applies to it, up to one change of convention: the
+Frobenius used here is arithmetic, where Lafforgue writes the characteristic
+polynomials for geometric Frobenius, its inverse, and the two determine each
+other. What follows from it is that the
 places of a proper model outside `Spec A` are not points of `U`, so "unramified
 outside `S`" says nothing about them, and the group here is not `π₁^ét(X ∖ S)`
 for projective `X`.

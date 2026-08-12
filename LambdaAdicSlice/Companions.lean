@@ -25,9 +25,10 @@ section Setup
 -- places carried by the chosen model: for `A = 𝓞 K` they are the finite places of
 -- a number field, and for a finite-type Dedekind model of a function field they
 -- are the closed points of the corresponding affine curve, hence all but finitely
--- many places of the proper curve. For an arbitrary Dedekind subring they are
--- neither, since Mathlib's `IsDedekindDomain` admits localisations, discrete
--- valuation rings and fields. `exists_companion` imposes the finite-type
+-- many places of the proper curve. For an arbitrary Dedekind domain with
+-- fraction field `K` they need not be either, since Mathlib's `IsDedekindDomain`
+-- admits localisations, discrete valuation rings and fields.
+-- `exists_companion` imposes the finite-type
 -- hypothesis that pins this down.
 variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
   [Algebra A K] [IsFractionRing A K]
@@ -365,16 +366,19 @@ place `λ` at a time.
 
 This is a slice of VII.6, not the whole of it. VII.6 begins from an irreducible
 lisse sheaf of finite-order determinant and constructs `E` and the polynomials
-`P_v`; here both are supplied as data. VII.6 also proves purity, integrality of
-the Frobenius roots, and a further descent statement, none of which is
-formalised.
+`P_v`; here both are supplied as data. VII.6 also proves purity, unit-ness of the Frobenius
+roots away from `p` with slope bounds at the places over `p`, and a further
+statement descending the `n`-th power of the companion to `E_λ` itself, none of
+which is formalised.
 
 `A` is a finite-type Dedekind `𝔽_q`-algebra with fraction field the function
 field `K`, so `Spec A` is a smooth affine curve over `𝔽_q` and its closed points
-are all but finitely many places of `K`. Without the finite-type hypothesis `A`
-could be a discrete valuation ring or `K` itself, `HeightOneSpectrum A` could be
-a single point or empty, and the statement would be satisfiable by an
-everywhere-unramified companion-matrix construction.
+are all but finitely many places of `K`. Without the finite-type hypothesis `A` could be a
+discrete valuation ring or `K` itself and `HeightOneSpectrum A` a single point
+or empty, collapsing the compatibility conditions. Finiteness of `K` over
+`Fq(t)` is not assumed: the finite-type hypothesis and the compatible embedding
+of `RatFunc Fq` already force it, which is why no `FunctionField` hypothesis
+appears.
 
 Hypotheses on `ρ₀`: absolute irreducibility (`SpanFull`), finite-order
 determinant, unramified at every `v ∉ S`, and Frobenius characteristic
@@ -387,8 +391,11 @@ varies).
 Conclusion: a companion over a finite extension of `E_λ`, unramified outside `S`,
 with the same `P v`, itself absolutely irreducible with finite-order determinant.
 
-The curve here is the smooth affine `U = Spec A` with `S` removed, to which
-VII.6 applies directly. The places of a proper model lying outside `Spec A` are
+The curve here is the smooth affine `U = Spec A` with `S` removed, to which VII.6
+applies after one change of convention: the Frobenius here is arithmetic,
+`x ↦ x ^ #(A/v)`, where Lafforgue writes the characteristic polynomials for
+geometric Frobenius, its inverse, and the polynomials of an invertible matrix
+and of its inverse determine each other. The places of a proper model lying outside `Spec A` are
 not points of `U`, so nothing is claimed about them; that is a statement of scope,
 not a shortfall. What is deliberately not formalised is any descent of the
 coefficient field to `E_λ`.
@@ -398,7 +405,6 @@ theorem exists_companion
     {Fq : Type*} [Field Fq] [Finite Fq]
     [Algebra Fq A] [Algebra Fq K] [IsScalarTower Fq A K] [Algebra.FiniteType Fq A]
     [Algebra (RatFunc Fq) K] [IsScalarTower Fq (RatFunc Fq) K]
-    (hK : FunctionField Fq K)
     (hn : 0 < n)
     (Frob : FrobeniusChoice A K Kbar)
     (S : Finset (HeightOneSpectrum A))
@@ -449,7 +455,6 @@ theorem exists_companion_family
     {Fq : Type*} [Field Fq] [Finite Fq]
     [Algebra Fq A] [Algebra Fq K] [IsScalarTower Fq A K] [Algebra.FiniteType Fq A]
     [Algebra (RatFunc Fq) K] [IsScalarTower Fq (RatFunc Fq) K]
-    (hK : FunctionField Fq K)
     (hn : 0 < n)
     (Frob : FrobeniusChoice A K Kbar)
     (S : Finset (HeightOneSpectrum A))
@@ -478,8 +483,8 @@ theorem exists_companion_family
                   (algebraMap E (Completion E lam)))) ∧
         SpanFull (F lam h).toHom ∧ DetFiniteOrderHom (F lam h).toHom := by
   choose F hF using fun (lam : CoeffPlace E) (h : resChar E lam ≠ ringChar K) =>
-    exists_companion A K Kbar E n hK hn Frob S P hchar₀ rho₀ hspan hdet hunram
-      hrat lam h
+    exists_companion (Fq := Fq) A K Kbar E n hn Frob S P hchar₀ rho₀ hspan
+      hdet hunram hrat lam h
   exact ⟨F, hF⟩
 
 end CompanionFamily
