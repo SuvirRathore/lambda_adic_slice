@@ -369,7 +369,10 @@ variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
 VII.6, after fixing the coefficient field `E` and an `E_{λ₀}`-model, stated one
 place `λ` at a time. Clause (v) gives the companion and its coefficient field;
 the companion's finite-order determinant is carried from the construction in the
-proof rather than read off the clause.
+proof rather than read off the clause — and is in any case implied by the
+unramifiedness and characteristic-polynomial conclusions together with `hdet`,
+by the same Chebotarev density of the Frobenius classes and continuity of the
+determinant.
 
 This is a slice of VII.6, not the whole of it. VII.6 begins from an irreducible
 lisse sheaf of finite-order determinant and constructs `E` and the polynomials

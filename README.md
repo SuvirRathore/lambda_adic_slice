@@ -52,7 +52,9 @@ follows by choice, and `exists_companion_family` is that derivation.
 This is the companion-existence part of Lafforgue's Theorem VII.6, not the
 whole of it: clause (v) gives the companion and its coefficient field, and the
 companion's finite-order determinant is carried from the construction in the
-proof. VII.6 starts from an irreducible lisse sheaf with finite-order
+proof, though it is in any case implied by the other conclusions together with
+the finite-order hypothesis on `ρ₀`, by the same Chebotarev density and
+continuity of the determinant used in the degree-bound remark. VII.6 starts from an irreducible lisse sheaf with finite-order
 determinant and constructs `E` and the `P_v`, which are hypotheses here; it also proves
 purity, unit-ness of the Frobenius roots away from `p` with slope bounds at the
 places over `p`, and a further statement descending the `n`-fold direct sum of the companion to `E_λ` itself. In
