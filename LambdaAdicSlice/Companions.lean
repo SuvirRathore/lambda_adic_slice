@@ -10,9 +10,9 @@ for curves.
 
 Five supporting results are proved. The companion theorem is stated with its
 proof left `sorry`, and the family over all coefficient places is derived from
-it by choice, inheriting that `sorry`. The one ingredient Mathlib v4.28.0
-cannot construct — existence of Frobenius elements in the absolute Galois
-group — is taken as explicit data and documented as such.
+it by choice, inheriting that `sorry`. Existence of Frobenius elements in the absolute
+Galois group, which Mathlib v4.28.0 cannot construct, is taken as explicit data
+and documented as such.
 -/
 import Mathlib
 
@@ -92,9 +92,7 @@ This is not the well-definedness fact behind the compatible-family
 condition. Two Frobenius elements at the same prime `Q` above a place need not be
 conjugate: they differ by an element of the inertia at `Q`. Across different
 primes above one place, a conjugation moves the prime first. The correct argument is
-`toHom_eq_of_isArithFrobAt` below, which runs through `Ideal.inertia`. An
-earlier version of this file asserted the conjugacy statement as an axiom and
-described this lemma as establishing well-definedness; both were wrong. -/
+`toHom_eq_of_isArithFrobAt` below, which runs through `Ideal.inertia`. -/
 theorem charpoly_eq_of_isConj
     {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam)
     {g g' : AbsGal K Kbar} (h : IsConj g g') :
@@ -141,7 +139,7 @@ Note that this predicate silently entails finiteness of the residue field
 `A ⧸ v`. Mathlib defines `IsArithFrobAt` by `g • x ≡ x ^ #(A ⧸ v) (mod Q)` with
 `#` read as `Nat.card`; if `A ⧸ v` is infinite that cardinal is `0`, the
 congruence at `x = 0` forces `1 ∈ Q`, and `Q.IsPrime` fails. So there is no
-degenerate `q = 0` reading — but `FrobeniusChoice` below is uninhabited for any
+degenerate `q = 0` reading, but `FrobeniusChoice` below is uninhabited for any
 `A` with an infinite residue field, and every result taking one is then
 vacuously true. -/
 def IsFrobAt (v : HeightOneSpectrum A) (g : AbsGal K Kbar) : Prop :=
@@ -205,7 +203,7 @@ variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
 
 Existence of Frobenius elements in the *absolute* Galois group is not available
 in Mathlib v4.28.0. `IsArithFrobAt.exists_of_isInvariant` fails at `K̄` on three
-counts, not one: it requires a finite residue field at the chosen prime (at `K̄`
+counts: it requires a finite residue field at the chosen prime (at `K̄`
 that field is the algebraic closure of `A/v`), a finite acting group, and
 `Algebra.IsInvariant`. Proving existence needs the surjectivity of the
 decomposition group onto the residue Galois group together with an
@@ -395,8 +393,8 @@ determinant, unramified at every `v ∉ S`, and Frobenius characteristic
 polynomials given by a fixed `P : v ↦ P v` over `E`. `P` is data rather than an
 existential so that the same polynomials appear in the conclusion; this is what
 ties the companion to `ρ₀`, and it is why no clause `rho lam₀ = rho₀` is needed
-(that equality would in any case be type-inappropriate once the coefficient field
-varies).
+(that equality would
+be type-inappropriate once the coefficient field varies).
 
 Conclusion: a companion over a finite extension of `E_λ`, unramified outside `S`,
 with the same `P v`, itself absolutely irreducible with finite-order determinant.
@@ -406,9 +404,8 @@ applies after one change of convention: the Frobenius here is arithmetic,
 `x ↦ x ^ #(A/v)`, where Lafforgue writes the characteristic polynomials for
 geometric Frobenius, its inverse, and the polynomials of an invertible matrix
 and of its inverse determine each other. The places of a proper model lying outside `Spec A` are
-not points of `U`, so nothing is claimed about them; that is a statement of scope,
-not a shortfall. What is deliberately not formalised is any descent of the
-coefficient field to `E_λ`.
+not points of `U`, so nothing is claimed about them. What is deliberately not
+formalised is any descent of the coefficient field to `E_λ`.
 
 Statement only: the proof is `sorry`. -/
 theorem exists_companion
@@ -515,8 +512,7 @@ same prime `Q` above `v`, then `ρ g = ρ g'`.
 
 This is the correct well-definedness argument, and it runs through *inertia*,
 not conjugacy: `IsArithFrobAt.mul_inv_mem_inertia` gives `g * g'⁻¹ ∈ inertia Q`,
-which `ρ` kills. An earlier version of this file asserted instead that any two
-Frobenius elements at a place are conjugate — that is false. -/
+which `ρ` kills. -/
 theorem toHom_eq_of_isArithFrobAt {lam : CoeffPlace E}
     (rho : LambdaAdicRep K Kbar E n lam) {v : HeightOneSpectrum A}
     (hunram : IsUnramifiedAt A K Kbar E n rho v)

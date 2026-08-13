@@ -8,13 +8,13 @@ for curves. Five supporting lemmas are proved, the companion
 theorem is stated and left `sorry` deliberately, and the family over all
 coefficient places is derived from it by choice. Getting the statement exactly right is the point,
 since a statement can compile, pass an axiom audit, and still be mathematically
-false. Several such errors were found here and corrected.
+false.
 
 A secondary purpose is to establish precisely which ingredients Mathlib v4.28.0
 supports and which it does not.
 
-Drafted with LLM assistance; every statement was independently audited against
-Mathlib v4.28.0 source and the primary literature. AUDIT.md records the Mathlib
+Drafted with LLM assistance; I audited every statement against Mathlib v4.28.0
+source and the primary literature. AUDIT.md records the Mathlib
 survey, the errors corrected, and the claims that remain unverified.
 
 ## The slice
@@ -81,8 +81,7 @@ Drinfeld's Theorem 1.1 carries a hypothesis that the roots of the characteristic
 polynomials are `λ`-adic units. For curves that is a consequence rather than an
 extra assumption: unramifiedness on the curve makes the representation a lisse
 sheaf there, and Lafforgue proves unit-ness for an irreducible lisse sheaf with
-finite-order determinant. Nothing has been dropped, and the mechanism is not
-purity. Being a unit away from
+finite-order determinant. The mechanism is not purity. Being a unit away from
 `p` is part (iii) of Deligne's Conjecture 1.2.10, where the label (c) is
 Drinfeld's numbering in his abbreviated restatement rather than Deligne's. It is
 a conclusion separate from the weight condition, which is part (i) there, and for
@@ -140,14 +139,12 @@ theorem over an algebraic closure `R̄` gives a span of dimension `n²`, and the
 span over `R̄` is `R̄ ⊗_R` the span over `R`, so the span over `R` already has
 dimension `n²`.
 
-The equivalence is not formalised; it is what justifies the choice of predicate.
-The point is that the predicate mentions no closure, no base change and no
-topology, and applies unchanged to the companion over `M`.
+The equivalence is not formalised; it is what justifies the choice of predicate,
+which applies unchanged to the companion over `M`.
 
 ## Limitations
 
-These are deliberately out of scope, and stated because a formalisation that
-compiles is not thereby correct.
+These are out of scope.
 
 Frobenius existence is assumed, not proved. `FrobeniusChoice` takes it as data.
 `IsArithFrobAt.exists_of_isInvariant` fails here on three counts: it requires a
@@ -169,16 +166,15 @@ Frobenius independence is proved only at a fixed prime. Comparing Frobenius
 elements at different primes above `v` needs transitivity of the `G_K`-action on
 those primes, which is not available here.
 
-There is no descent to `E_λ`. The companion lands in a finite extension `M/E_λ`.
-Descent to `E_λ` for the given `E` is not available. The obstruction is the class
+There is no descent to `E_λ` for the given `E`: the companion lands in a finite
+extension `M/E_λ`. The obstruction is the class
 of a central simple algebra in `Br(E_λ)`, the algebra Lafforgue's proof of
 VII.6(v) works with; no explicit counterexample is cited here. Removing it by
 enlarging `E` is Chin, *Independence of ℓ in Lafforgue's theorem*, Adv. Math. 180
 (2003), 64–86, which Drinfeld cites for exactly this step, and is not formalised
 here.
 
-`HeightOneSpectrum A` indexes an affine model, which is a statement of scope
-rather than a shortfall: `U = Spec A` with `S` removed is a smooth affine curve
+`HeightOneSpectrum A` indexes an affine model: `U = Spec A` with `S` removed is a smooth affine curve
 and Lafforgue's theorem applies to it, up to one change of convention: the
 Frobenius used here is arithmetic, where Lafforgue writes the characteristic
 polynomials for geometric Frobenius, its inverse, and the two determine each
@@ -195,40 +191,26 @@ hypothesis of `exists_companion`.
 The main theorem is `sorry`. Formalising the proof is not in scope.
 
 The slice is stated via `G_K` with an unramified-outside-`S` condition rather
-than via `π₁^ét(X ∖ S)`. Mathlib v4.28.0 has a complete abstract Galois-category
-development in `Mathlib/CategoryTheory/Galois/`, whose only worked instance is
-the category of finite `G`-sets. It also has both étale sites as Grothendieck
-topologies in `AlgebraicGeometry/Sites/Etale.lean`, the small one on the category
-of schemes étale over `X`. What is missing is the link between the two
-developments: the finite étale subcategory, a fibre functor on it, and the
-Galois-category instance. So no `π₁^ét(X)` is available.
+than via `π₁^ét(X ∖ S)`, because no `π₁^ét(X)` is available in Mathlib v4.28.0.
+AUDIT.md records what the library has here and what is missing.
 
 ## Correctness
 
 `lake build` verifies that the proofs are valid. It does not verify that the
-definitions say what they are intended to say. That gap is the entire risk here,
-and it is where every error listed in AUDIT.md was found.
-
-One pattern is worth naming, because it recurred. An earlier version placed the
-companions over `E_λ` itself and assumed irreducibility over `E_λ` rather than
-absolute irreducibility. Both were recorded as limitations, when in fact they
-made the statement assert more than Lafforgue's theorem gives. A `sorry` conceals
-the difference: a statement that is unprovable because it is false looks exactly
+definitions say what they are intended to say. Every error listed in AUDIT.md was found in that gap. A `sorry` conceals the
+difference: a statement that is unprovable because it is false looks exactly
 like a statement that is unproved because the infrastructure is missing.
 
 CI runs the build, checks the axiom profile of the declarations named in
-`Axioms.lean`, and counts the `sorry` tokens in the source, requiring exactly
-one. The axiom guard pins the set of axiom names in each declaration's
-dependency closure — the five lemmas admit none beyond the classical three, the
-two theorems additionally `sorryAx` — not the number or location of `sorry`
-terms. The count is what rules out a second `sorry` arriving inside an
-already-tainted proof, or in a declaration outside the guarded closures, either
-of which `lake build` accepts with only a warning. Further review is welcome.
+`Axioms.lean` (the five lemmas admit none beyond the classical three, the two
+theorems additionally `sorryAx`), and counts the `sorry` tokens in the source,
+requiring exactly one. AUDIT.md records what each check establishes and what it
+misses. Further review is welcome.
 
 ## Next steps
 
 The most self-contained is existence of Frobenius elements in the absolute Galois
-group, which is missing from Mathlib and is a plausible contribution. Beyond
+group, which is missing from Mathlib. Beyond
 that: coefficient-field descent, which would replace `M` by `E_λ` for a suitably
 enlarged `E`; independence of `ℓ` for arithmetic monodromy groups, where Chin,
 *Independence of ℓ of monodromy groups*, J. Amer. Math. Soc. 17 (2004), 723–747,
