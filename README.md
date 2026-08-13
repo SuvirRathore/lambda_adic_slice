@@ -4,8 +4,9 @@
 
 A statement-level formalisation in Lean 4 of compatible families of λ-adic Galois
 representations, and of the companion-existence statement of Lafforgue's theorem
-for curves. Five supporting lemmas are proved; the companion theorem is stated and
-left `sorry` deliberately. Getting the statement exactly right is the point,
+for curves. Five supporting lemmas are proved, the companion
+theorem is stated and left `sorry` deliberately, and the family over all
+coefficient places is derived from it by choice. Getting the statement exactly right is the point,
 since a statement can compile, pass an axiom audit, and still be mathematically
 false. Several such errors were found here and corrected.
 
@@ -48,12 +49,13 @@ determinant of finite order.
 The statement is made one place `λ` at a time. A family indexed by all `λ`
 follows by choice, and `exists_companion_family` is that derivation.
 
-This is the companion-existence part of Lafforgue's Theorem VII.6(v), not the
-whole of VII.6. VII.6 starts from an irreducible lisse sheaf with finite-order
+This is the companion-existence part of Lafforgue's Theorem VII.6, not the
+whole of it: clause (v) gives the companion and its coefficient field, and the
+companion's finite-order determinant is carried from the construction in the
+proof. VII.6 starts from an irreducible lisse sheaf with finite-order
 determinant and constructs `E` and the `P_v`, which are hypotheses here; it also proves
 purity, unit-ness of the Frobenius roots away from `p` with slope bounds at the
-places over `p`, and a further statement descending the `n`-th power of the
-companion to `E_λ` itself. In
+places over `p`, and a further statement descending the `n`-fold direct sum of the companion to `E_λ` itself. In
 the other direction, the curve here is the affine `Spec A` with `S` removed,
 where VII.6 treats a smooth curve as an open subscheme of a projective one.
 
@@ -212,10 +214,14 @@ made the statement assert more than Lafforgue's theorem gives. A `sorry` conceal
 the difference: a statement that is unprovable because it is false looks exactly
 like a statement that is unproved because the infrastructure is missing.
 
-CI runs the build and checks the axiom profile of the declarations named in
-`Axioms.lean`, so the deliberate `sorry` cannot silently spread into them. It
-does not cover declarations outside their dependency closures, since `lake build`
-exits successfully on the warning a `sorry` emits. Further review is welcome.
+CI runs the build, checks the axiom profile of the declarations named in
+`Axioms.lean`, and counts the `sorry` tokens in the source, requiring exactly
+one. The axiom guard pins the set of axiom names in each declaration's
+dependency closure — the five lemmas admit none beyond the classical three, the
+two theorems additionally `sorryAx` — not the number or location of `sorry`
+terms. The count is what rules out a second `sorry` arriving inside an
+already-tainted proof, or in a declaration outside the guarded closures, either
+of which `lake build` accepts with only a warning. Further review is welcome.
 
 ## Next steps
 

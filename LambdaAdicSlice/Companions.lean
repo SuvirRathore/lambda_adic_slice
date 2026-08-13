@@ -5,13 +5,14 @@ Authors: Suvir Rathore
 -/
 /-
 Statement-level formalisation: compatible families of λ-adic Galois
-representations, and the statement of Lafforgue's companion theorem for curves.
+representations, and the companion-existence statement of Lafforgue's theorem
+for curves.
 
-Five supporting results are proved. The companion theorem itself is stated only;
-its proof is `sorry`. Ingredients Mathlib v4.28.0 cannot construct — existence of
-Frobenius elements in the absolute Galois group, and the `MulSemiringAction` of
-`G_K` on the integral closure — are supplied as explicit data or instances and
-documented as such.
+Five supporting results are proved. The companion theorem is stated with its
+proof left `sorry`, and the family over all coefficient places is derived from
+it by choice, inheriting that `sorry`. The one ingredient Mathlib v4.28.0
+cannot construct — existence of Frobenius elements in the absolute Galois
+group — is taken as explicit data and documented as such.
 -/
 import Mathlib
 
@@ -36,8 +37,10 @@ variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
 -- A fixed algebraic closure of `K`.
 variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
 
-/-- The absolute Galois group `G_K`. The Krull topology instance comes from
-`Mathlib/FieldTheory/KrullTopology.lean`. -/
+/-- The automorphism group of `Kbar` over `K`. The abbreviation itself asks only
+for an extension; wherever the theorems below live, the ambient
+`IsAlgClosure K Kbar` hypothesis makes this the absolute Galois group `G_K`. The
+Krull topology instance comes from `Mathlib/FieldTheory/KrullTopology.lean`. -/
 abbrev AbsGal := Kbar ≃ₐ[K] Kbar
 
 -- The coefficient field `E`.
@@ -323,7 +326,9 @@ universe u
 
 /-- A **companion representation** at `λ`: a continuous representation of `G_K`
 into `GL_n(M)` for some finite extension `M` of `E_λ`, carrying the `E_λ`-module
-topology.
+topology. As with `AbsGal`, the structure asks of `Kbar` only that it extend
+`K`; the `G_K` reading comes from the `IsAlgClosure` hypothesis in force where
+the theorems use it.
 
 The coefficient field is bundled because Lafforgue's theorem does not produce
 companions over `E_λ` itself. Theorem VII.6(v) states the companion over a finite
@@ -361,15 +366,17 @@ variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
 variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
 
 /-- The finite-extension companion-existence consequence of Lafforgue's Theorem
-VII.6(v), after fixing the coefficient field `E` and an `E_{λ₀}`-model, stated one
-place `λ` at a time.
+VII.6, after fixing the coefficient field `E` and an `E_{λ₀}`-model, stated one
+place `λ` at a time. Clause (v) gives the companion and its coefficient field;
+the companion's finite-order determinant is carried from the construction in the
+proof rather than read off the clause.
 
 This is a slice of VII.6, not the whole of it. VII.6 begins from an irreducible
 lisse sheaf of finite-order determinant and constructs `E` and the polynomials
 `P_v`; here both are supplied as data. VII.6 also proves purity, unit-ness of the Frobenius
 roots away from `p` with slope bounds at the places over `p`, and a further
-statement descending the `n`-th power of the companion to `E_λ` itself, none of
-which is formalised.
+statement descending the `n`-fold direct sum of the
+companion to `E_λ` itself, none of which is formalised.
 
 `A` is a finite-type Dedekind `𝔽_q`-algebra with fraction field the function
 field `K`, so `Spec A` is a smooth affine curve over `𝔽_q` and its closed points
