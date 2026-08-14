@@ -2,7 +2,8 @@
 Machine-checked attestation of the axiom profile. `lake env lean Axioms.lean`
 fails if any proved lemma acquires an axiom dependency or if either companion
 theorem's axiom set changes. It pins the set of axiom names, not the number or
-location of `sorry` terms; the source-level count in CI covers those. Run in
+location of `sorry` terms; the source-level line count in CI covers
+those, for `sorry` written on its own line. Run in
 CI.
 -/
 import LambdaAdicSlice.Companions

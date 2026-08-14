@@ -162,13 +162,15 @@ the conclusion it supported, that no `π₁^ét(X)` is available, survives.
 
 ## What is not machine-checked
 
-Compile status, the axiom profile, and the count of `sorry` tokens are checked in CI; see `Axioms.lean` and
+Compile status, the axiom profile, and the count of `sorry` lines are checked
+in CI; see `Axioms.lean` and
 `.github/workflows/build.yml`. The axiom check pins the set of axiom names in each named declaration's
 dependency closure. On its own that misses two things: a `sorry` in a
 declaration outside those closures, and a second `sorry` inside a closure
 already reporting `sorryAx`, since the set of names does not change; `lake
-build` accepts both with only a warning. CI therefore also counts the `sorry`
-tokens in the source and requires exactly one. The one admitted declaration is
+build` accepts both with only a warning. CI therefore also counts the source lines consisting of `sorry` and requires
+exactly one, which closes both when the `sorry` stands on its own line; a
+`sorry` inlined into a tactic block in either place would still pass. The one admitted declaration is
 `exists_companion`; `exists_companion_family` is proved and inherits its
 `sorryAx`. No instances are declared on types Mathlib owns; the five instances declared here are the
 projections of `CompanionRep`, whose carrier is defined here.

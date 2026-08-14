@@ -238,8 +238,8 @@ like a statement that is unproved because the infrastructure is missing.
 
 CI runs the build, checks the axiom profile of the declarations named in
 `Axioms.lean` (the five lemmas admit none beyond the classical three, the two
-theorems additionally `sorryAx`), and counts the `sorry` tokens in the source,
-requiring exactly one. AUDIT.md records what each check establishes and what it
+theorems additionally `sorryAx`), and counts the source lines
+consisting of `sorry`, requiring exactly one. AUDIT.md records what each check establishes and what it
 misses.
 
 ## Next steps
