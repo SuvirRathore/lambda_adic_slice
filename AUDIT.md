@@ -209,3 +209,44 @@ the remark about the Fontaine–Mazur conjecture.
 
 Mathematical claims in the prose are not machine-checked; the compiled theorems
 are listed in the README.
+
+## Adversarial probes
+
+I probed the statement with an automated theorem prover, Aristotle, which
+searches for any proof a statement admits, including the proofs that exist only
+because the statement is broken. Asked to fill the `sorry` in
+`exists_companion`, it attacked the statement rather than the mathematics: it
+looked for a contradiction in the hypothesis package, a degenerate model, a
+trivial companion, an escape at `n = 0`, and a transport of `ρ₀` along an
+abstract field isomorphism. Every attack failed where this record says it
+should. It derived that the base ring cannot be a field, a finite-type algebra
+over a finite field that is a field being finite while `Fq(t)` embeds in the
+fraction field, and that a trivial companion forces `P v = (X - 1)^n` at
+infinitely many places against a finite `S`. No field embedding connects
+completions of distinct residue characteristics, which closed the transport
+route. It checked in Lean that the Galois action underlying `IsFrobAt` is the
+genuine one, and it returned the repository unmodified, concluding that the
+residual content of the `sorry` is the companion-existence theorem itself. It
+had this repository's documentation available, so that reading is not
+independent testimony; the failed attacks are.
+
+The definitions got the same treatment. I submitted `SpanFull` for the trivial
+two-dimensional representation as a target; the statement is false, since the
+span of the identity is the scalar line, and a definition of absolute
+irreducibility that a prover can satisfy for a reducible representation would
+be broken. The prover declined to prove it and proved its negation instead,
+exhibiting a matrix outside the span. The definition held with its own failure
+mode as the target.
+
+The third probe asked for a term of `FrobeniusChoice`, the one ingredient this
+repository assumes, and the prover constructed it. Mathlib v4.28.0's profinite
+invariant theory applies over the separable closure, where `A` is the ring of
+invariants of the integral closure; the obstruction recorded above, that the
+invariants over `K̄` contain the purely inseparable elements as well, is absent
+there. The arithmetic Frobenius it produces lifts to `Aut(K̄/K)` because
+`K̄/Ks` is purely inseparable. I audited the proof against the pinned source
+and checked it with the kernel; it depends only on `propext`,
+`Classical.choice` and `Quot.sound`. The construction is not part of this
+repository: `FrobeniusChoice` remains data here and every result conditional on
+it stays conditional. What the probe changes is the status of the assumption,
+from open to constructible at the pinned Mathlib.
