@@ -1,16 +1,15 @@
 # Audit record
 
-`lake build` verifies that proofs are valid. It says nothing about whether the
-definitions mean what they claim. For a statement-level formalisation that gap is
-the entire risk, so this file records what Mathlib v4.28.0 could and could not
-supply, which errors were found in the course of the work, and which claims here
-are not machine-checked.
+`lake build` kernel-checks the proofs that are given, accepting `sorry` as an
+axiom; it says nothing about whether the definitions mean what they claim. This
+file records what Mathlib v4.28.0 could and could not supply, the errors found,
+and which claims are not machine-checked.
 
 ## Mathlib v4.28.0
 
 Everything below was verified by reading source at the pinned tag rather than
-from recall, claims of absence included. Those are the easiest kind to leave
-unchecked, and both kinds have been got wrong here at least once; see below.
+from recall, claims of absence included; both kinds have been got wrong here at
+least once.
 
 Available: `krullTopology` on `Gal(L/K)`; `IsDedekindDomain.HeightOneSpectrum`
 and `.adicCompletion`; `GL`; `Matrix.charpoly` and `Matrix.charpoly_units_conj`;
@@ -33,7 +32,9 @@ representation.
 Missing: `π₁^ét(X)` for schemes. The Galois-category development is abstract,
 with finite `G`-sets as its only worked instance. Both the big étale site and the
 small one, on the category of schemes étale over `X`, exist as Grothendieck
-topologies in `AlgebraicGeometry/Sites/Etale.lean`. What is absent is the finite
+topologies in `AlgebraicGeometry/Sites/Etale.lean`, together with a geometric
+point `geometricFiber` of the big étale topology at a separably closed field.
+What is absent is the finite
 étale subcategory, a fibre functor on it, and the Galois-category instance
 joining the two developments. This decided the `G_K`-based formulation.
 Chebotarev density is absent entirely, as is characteristic-polynomial
@@ -43,7 +44,9 @@ Three facts about the Frobenius API constrain the design.
 
 `IsArithFrobAt R g Q` unfolds to `∀ x, g • x - x ^ Nat.card (R ⧸ Q.under R) ∈ Q`.
 If the base residue ring were infinite that cardinal is `0`, the congruence at
-`x = 0` gives `1 ∈ Q`, and primality fails. So there is no degenerate `q = 0`
+`x = 0` gives `1 ∈ Q`, and primality fails; Mathlib
+records this as `AlgHom.IsArithFrobAt.finite_quotient`. So there is no
+degenerate `q = 0`
 reading, but a Frobenius choice is uninhabited whenever a residue field is
 infinite, and every result taking one is then vacuously true.
 
@@ -56,14 +59,24 @@ Frobenii at primes over one base prime (`isConj_arithFrobAt`, via
 `exists_primesOver_isConj`), both under the same finiteness and invariance
 hypotheses, and uniqueness under unramifiedness
 (`AlgHom.IsArithFrobAt.eq_of_isUnramifiedAt`), an `AlgHom`-level statement whose
-hypotheses are instead Noetherianity of the extension and `Algebra.IsUnramifiedAt`
+hypotheses are instead Noetherianity of the top ring and `Algebra.IsUnramifiedAt`
 at the prime. None of it transfers: the first two for the group-finiteness
-reasons above, the third because the integral closure in `K̄` is neither
-Noetherian nor unramified there.
+reasons above, the third because the integral closure in `K̄` is not
+Noetherian; its `Algebra.IsUnramifiedAt` hypothesis in fact holds there, the
+integral closure being perfect in characteristic `p`.
 
 `isPretransitive_of_isGaloisGroup` requires `[Finite G]` and
-`[IsGaloisGroup G A B]`, so transitivity of the action on primes above a place is
-unavailable, which is why Frobenius independence is proved only at a fixed prime.
+`[IsGaloisGroup G A B]`. `RingTheory/Invariant/Profinite.lean` removes the
+finiteness: `Algebra.IsInvariant.exists_smul_of_under_eq_of_profinite` gives
+transitivity on the primes over a base prime for a profinite group acting
+continuously on a discrete ring, and
+`Ideal.Quotient.stabilizerHom_surjective_of_profinite` surjects the stabilizer
+of a prime onto the residue Galois group. Both carry `Algebra.IsInvariant`,
+which fails for `G_K` on the integral closure in `K̄`: the invariants are the
+integral elements of the purely inseparable closure of `K`, not `A`. A
+derivation over the separable closure, transferred along the purely inseparable
+extension, is not carried out here, which is why Frobenius independence is
+proved only at a fixed prime.
 
 ## Errors found and corrected
 
@@ -90,8 +103,8 @@ of `E_λ` and descent to `E_λ` for a fixed `E` is obstructed by the class of a
 central simple algebra in `Br(E_λ)`. Chin's theorem is the stronger uniform
 coefficient-field descent, available after enlarging `E`. The irreducibility hypothesis was irreducibility over `E_λ`, which is
 weaker than absolute irreducibility, so using it strengthened the theorem. Both
-had been filed as limitations, which reads as having proved less when the truth
-was that it asserted more.
+had been recorded as limitations; in fact each made the statement assert more,
+not less.
 
 Next were two ways the statement could hold without content. Frobenius existence
 was never actually assumed, since declaring a structure with an existence field
@@ -101,8 +114,7 @@ with the right fraction field, and fields and discrete valuation rings qualify,
 so the place set could be empty or a single point. In the empty case every condition in the
 definition quantifies over places that do not exist, and the conclusion was
 trivially satisfiable; a single place leaves the compatibility conditions
-constraining one Frobenius conjugacy class instead of infinitely many. An
-earlier version of this file claimed an explicit cheap witness in the one-place
+constraining one Frobenius conjugacy class instead of infinitely many. This file previously claimed an explicit cheap witness in the one-place
 case, a companion-matrix representation of the constant-field quotient. That was
 overstated: the construction is guaranteed to match the prescribed
 polynomial only at a place of degree one: a place of degree `d` sends the generator to the
@@ -113,8 +125,11 @@ of that shape survive the present conclusion: a representation factoring through
 a procyclic group has image generated by a single matrix `C`, so its span lies
 in `M[C]` and has dimension at most `n`, short of the `n²` that `SpanFull`
 demands once `n > 1`. Requiring the
-base ring to be a finite-type algebra over the chosen finite base field makes its spectrum
-a smooth affine curve carrying cofinitely many of the places, and closes this.
+base ring to be a finite-type algebra over the chosen finite base field rules
+out the discrete valuation rings, and the compatible embedding of `Fq(t)` into
+the fraction field rules out the finite fields, which are finite-type with empty
+spectrum; together they make the spectrum a smooth affine curve carrying
+cofinitely many of the places, and close this.
 
 Three claims were described as doing more than they do.
 `charpoly_eq_of_isConj` was said to establish well-definedness of the
@@ -137,51 +152,13 @@ lean on the transitivity that is unavailable here.
 
 One error was not about the mathematics at all. An action of `G_K` on the
 integral closure of `A` in `K̄`, and the `SMulCommClass` accompanying it, were
-written by hand and documented in three places as absent from Mathlib and
-supplied here. Both are in Mathlib v4.28.0, and both resolve in this file's own context without help, so the
+declared here and documented in three places as absent from Mathlib. Both are in Mathlib v4.28.0, and both resolve in this file's own context without help, so the
 hand-written versions were shadowing them. The claim came from an early survey
 and was repeated without reading the source. A claim of absence is not a
 mathematical claim, and review aimed at the mathematics does not test it. The instances are deleted
 and the file builds on Mathlib's. A related inventory error in the same area, an
 undercount of what the étale-site file contains, was corrected at the same time;
 the conclusion it supported, that no `π₁^ét(X)` is available, survives.
-
-## Why the unramifiedness hypothesis is not redundant
-
-It is tempting to drop it. Continuity forces the image into a compact subgroup of
-`GL_n(E_λ)`, which stabilises a lattice, so the representation modulo each power
-of the maximal ideal factors through a finite extension ramified at finitely many
-places. That gives a finite ramification set at every finite level, but the
-level-wise sets need not stabilise, and for `n ≥ 2` they need not. For
-`ℓ ≠ char K`, a Kummer class built from `b_m = ∏_{i ≤ m} π_i^{ℓ^i}`, with the places `v_i` and elements `π_i` chosen
-inductively so that `v_i(π_i) = 1` and `v_i(π_j) = 0` for every `j ≠ i`, gives a
-continuous upper-triangular `ρ = (χ_ℓ, c; 0, 1) : G_K → GL₂(ℤ_ℓ)` ramified at
-every `v_i`; a block sum with the trivial representation extends this to every
-`n ≥ 2`. Controlling the earlier `π_j` at `v_i` as well as the later ones is
-what makes `v_i(b_m) = ℓ^i` exactly, which is nonzero mod `ℓ^m` for every
-`m > i`. Ramakrishna,
-*Infinitely ramified Galois representations*, Ann. of Math. 151 (2000), 793–815,
-constructs over `ℚ`, for every prime `ℓ ≥ 5` in a set of density one,
-surjective `GL₂(ℤ_ℓ)`-valued representations ramified at infinitely many primes,
-so even full image is compatible with infinite
-ramification;
-Khare–Rajan, Int. Math. Res. Not. 2001, no. 12, 601–607, show that for continuous
-semisimple representations of the absolute Galois group of a number field the
-ramified set has density zero while remaining possibly infinite, and remark that
-the same holds over function fields when the coefficient residue characteristic
-differs from the field characteristic. Semisimplicity is essential there; the
-Kummer representations above are not semisimple. For `n = 1` the claim is true,
-since the torsion of `1 + 𝔪` is finite and class field theory closes the
-argument.
-
-The example settles continuity alone. It does not show the hypothesis independent
-of the others: the representation displayed is reducible, so it fails `SpanFull`,
-and its determinant `χ_ℓ` has infinite order. Whether continuity together with
-absolute irreducibility and finite-order determinant forces finite ramification is
-not settled here. The hypothesis is stated because nothing available establishes
-that it can be dropped, which is also why finite ramification is an explicit
-condition in the Fontaine–Mazur conjecture rather than a consequence of
-continuity.
 
 ## What is not machine-checked
 
@@ -191,8 +168,9 @@ dependency closure. On its own that misses two things: a `sorry` in a
 declaration outside those closures, and a second `sorry` inside a closure
 already reporting `sorryAx`, since the set of names does not change; `lake
 build` accepts both with only a warning. CI therefore also counts the `sorry`
-tokens in the source and requires exactly one. No instances are declared on types Mathlib owns, so the diamond an earlier
-version created no longer arises; the five instances declared here are the
+tokens in the source and requires exactly one. The one admitted declaration is
+`exists_companion`; `exists_companion_family` is proved and inherits its
+`sorryAx`. No instances are declared on types Mathlib owns; the five instances declared here are the
 projections of `CompanionRep`, whose carrier is defined here.
 
 Five notions defined here have close Mathlib counterparts that are not used.
@@ -204,7 +182,9 @@ fixed-closure form of `AbsGal`; `IsIrred` is a matrix presentation of
 `Representation.IsIrreducible`; and `DetFiniteOrderHom` applied to `ρ` says
 `IsOfFinOrder` of the composite of `Matrix.GeneralLinearGroup.det` with `ρ`.
 Each matches what is written over the field-valued, positive-dimension setting
-used here, and each would be the better choice in a revision. Three further
+used here, and most would be the better choice in a revision;
+`Field.absoluteGaloisGroup` fixes the closure `AlgebraicClosure K`, where the
+parameterised `Kbar` is used throughout. Three further
 items: `IsUnramifiedAt` is hard-wired to representations over `E_λ`, so the same
 inertia condition is written a second time, inline, in the conclusion of
 `exists_companion`, where a version stated for an arbitrary `G →* GL n R` would
@@ -214,8 +194,9 @@ Mathlib, where explicit imports would record its actual dependencies. Section
 instance variables enter a definition only when it uses them, so the definitions
 here are stated over a bare commutative ring, and the Dedekind, fraction-field
 and algebraic-closure setting the README fixes binds only in the theorems, which
-include it automatically. The theorems therefore match the README's frame
-exactly; `IsCompatibleFamily`, which no theorem consumes, never regains that
+include it automatically. The two companion theorems match the README's
+frame exactly; the supporting lemmas omit hypotheses they do not use, and
+`IsCompatibleFamily`, which no theorem consumes, never regains that
 setting and is that much more general than its prose.
 
 I checked the literature attributions, including Deligne's part-numbering in

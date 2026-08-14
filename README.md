@@ -3,18 +3,17 @@
 [![build](https://github.com/SuvirRathore/lambda_adic_slice/actions/workflows/build.yml/badge.svg)](https://github.com/SuvirRathore/lambda_adic_slice/actions/workflows/build.yml)
 
 A statement-level formalisation in Lean 4 of compatible families of λ-adic Galois
-representations, and of the companion-existence statement of Lafforgue's theorem
-for curves. Five supporting lemmas are proved, the companion
-theorem is stated and left `sorry` deliberately, and the family over all
-coefficient places is derived from it by choice. Getting the statement exactly right is the point,
-since a statement can compile, pass an axiom audit, and still be mathematically
-false.
+representations and of the companion-existence statement of Lafforgue's theorem
+for curves. Five supporting lemmas are proved; the companion theorem is stated
+and deliberately left `sorry` (Lean's marker for a statement admitted without
+proof); the family over all coefficient places follows from it by the axiom of
+choice.
 
 A secondary purpose is to establish precisely which ingredients Mathlib v4.28.0
 supports and which it does not.
 
-Drafted with LLM assistance; I audited every statement against Mathlib v4.28.0
-source and the primary literature. AUDIT.md records the Mathlib
+Drafted with LLM assistance; I audited the statements against Mathlib v4.28.0
+source and the citations against the primary literature. AUDIT.md records the Mathlib
 survey, the errors corrected, and the claims that remain unverified.
 
 ## The slice
@@ -61,8 +60,7 @@ places over `p`, and a further statement descending the `n`-fold direct sum of t
 the other direction, the curve here is the affine `Spec A` with `S` removed,
 where VII.6 treats a smooth curve as an open subscheme of a projective one.
 
-`M` carries the `E_λ`-module topology, via Mathlib's `IsModuleTopology`, rather
-than an arbitrary one; that is what makes continuity well-posed. For a finite
+`M` carries the `E_λ`-module topology, via Mathlib's `IsModuleTopology`, rather than an arbitrary one; that pins which continuity is being asserted. For a finite
 extension of the complete field `E_λ` it is the canonical valuation topology, so
 the degenerate reading in which every map is continuous is excluded.
 
@@ -149,11 +147,10 @@ These are out of scope.
 Frobenius existence is assumed, not proved. `FrobeniusChoice` takes it as data.
 `IsArithFrobAt.exists_of_isInvariant` fails here on three counts: it requires a
 finite residue field at the chosen prime, which at `K̄` is the algebraic closure
-of `A/v`; a finite acting group; and `Algebra.IsInvariant`. Proving existence
-needs surjectivity of the decomposition group onto the residue Galois group
-together with an inverse-limit or Zorn argument over finite subextensions. The
-definition of arithmetic Frobenius transfers to the infinite level; the existence
-proof does not. Every result mentioning `FrobeniusChoice` is conditional on it.
+of `A/v`; a finite acting group; and `Algebra.IsInvariant`. Proving existence needs surjectivity of the decomposition group onto the
+residue Galois group together with an inverse-limit argument; Mathlib v4.28.0
+has both at the profinite level, under an invariance hypothesis that fails for
+the integral closure in `K̄`, and the derivation is not carried out here. Every result mentioning `FrobeniusChoice` is conditional on it.
 
 `IsFrobAt` silently entails a finite residue field. Mathlib defines
 `IsArithFrobAt` by `g · x ≡ x ^ #(A/v) (mod Q)` with `#` read as `Nat.card`. If
@@ -194,10 +191,48 @@ The slice is stated via `G_K` with an unramified-outside-`S` condition rather
 than via `π₁^ét(X ∖ S)`, because no `π₁^ét(X)` is available in Mathlib v4.28.0.
 AUDIT.md records what the library has here and what is missing.
 
+## Why the unramifiedness hypothesis is not redundant
+
+It is tempting to drop it. Continuity forces the image into a compact subgroup of
+`GL_n(E_λ)`, which stabilises a lattice, so the representation modulo each power
+of the maximal ideal factors through a finite extension ramified at finitely many
+places. That gives a finite ramification set at every finite level, but the
+level-wise sets need not stabilise, and for `n ≥ 2` they need not. For
+`ℓ ≠ char K`, a Kummer class built from `b_m = ∏_{i ≤ m} π_i^{ℓ^i}`, with the places `v_i` and elements `π_i` chosen
+inductively so that `v_i(π_i) = 1` and `v_i(π_j) = 0` for every `j ≠ i`, gives a
+continuous upper-triangular `ρ = (χ_ℓ, c; 0, 1) : G_K → GL₂(ℤ_ℓ)` ramified at
+every `v_i`; a block sum with the trivial representation extends this to every
+`n ≥ 2`. Controlling the earlier `π_j` at `v_i` as well as the later ones is
+what makes `v_i(b_m) = ℓ^i` exactly, which is nonzero mod `ℓ^m` for every
+`m > i`. Ramakrishna,
+*Infinitely ramified Galois representations*, Ann. of Math. 151 (2000), 793–815,
+constructs over `ℚ`, for every prime `ℓ ≥ 5` in a set of density one,
+surjective `GL₂(ℤ_ℓ)`-valued representations ramified at infinitely many primes,
+so even full image is compatible with infinite
+ramification;
+Khare–Rajan, Int. Math. Res. Not. 2001, no. 12, 601–607, show that for continuous
+semisimple representations of the absolute Galois group of a number field the
+ramified set has density zero while remaining possibly infinite, and remark that
+the same holds over function fields when the coefficient residue characteristic
+differs from the field characteristic. Semisimplicity is essential there; the
+Kummer representations above are not semisimple. For `n = 1` the claim is true,
+since the torsion of `1 + 𝔪` is finite and class field theory closes the
+argument.
+
+The example settles continuity alone. It does not show the hypothesis independent
+of the others: the representation displayed is reducible, so it fails `SpanFull`,
+and its determinant `χ_ℓ` has infinite order. Whether continuity together with
+absolute irreducibility and finite-order determinant forces finite ramification is
+not settled here. The hypothesis is stated because nothing available establishes
+that it can be dropped, which is also why finite ramification is an explicit
+condition in the Fontaine–Mazur conjecture rather than a consequence of
+continuity.
+
 ## Correctness
 
-`lake build` verifies that the proofs are valid. It does not verify that the
-definitions say what they are intended to say. Every error listed in AUDIT.md was found in that gap. A `sorry` conceals the
+`lake build` kernel-checks the proofs that are given, accepting `sorry` as an
+axiom; it does not verify that the definitions say what they are intended to
+say. Every mathematical error listed in AUDIT.md was found in that gap. A `sorry` conceals the
 difference: a statement that is unprovable because it is false looks exactly
 like a statement that is unproved because the infrastructure is missing.
 
@@ -205,7 +240,7 @@ CI runs the build, checks the axiom profile of the declarations named in
 `Axioms.lean` (the five lemmas admit none beyond the classical three, the two
 theorems additionally `sorryAx`), and counts the `sorry` tokens in the source,
 requiring exactly one. AUDIT.md records what each check establishes and what it
-misses. Further review is welcome.
+misses.
 
 ## Next steps
 

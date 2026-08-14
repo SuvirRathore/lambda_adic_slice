@@ -11,7 +11,7 @@ for curves.
 Five supporting results are proved. The companion theorem is stated with its
 proof left `sorry`, and the family over all coefficient places is derived from
 it by choice, inheriting that `sorry`. Existence of Frobenius elements in the absolute
-Galois group, which Mathlib v4.28.0 cannot construct, is taken as explicit data
+Galois group, which Mathlib v4.28.0 does not provide, is taken as explicit data
 and documented as such.
 -/
 import Mathlib
@@ -38,8 +38,9 @@ variable (A K : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
 variable (Kbar : Type*) [Field Kbar] [Algebra K Kbar] [IsAlgClosure K Kbar]
 
 /-- The automorphism group of `Kbar` over `K`. The abbreviation itself asks only
-for an extension; wherever the theorems below live, the ambient
-`IsAlgClosure K Kbar` hypothesis makes this the absolute Galois group `G_K`. The
+for an extension; in the companion theorems the ambient `IsAlgClosure K Kbar`
+hypothesis makes this the absolute Galois group `G_K`, and the supporting
+lemmas omit hypotheses they do not use. The
 Krull topology instance comes from `Mathlib/FieldTheory/KrullTopology.lean`. -/
 abbrev AbsGal := Kbar ≃ₐ[K] Kbar
 
@@ -138,7 +139,8 @@ here with nothing added by hand.
 Note that this predicate silently entails finiteness of the residue field
 `A ⧸ v`. Mathlib defines `IsArithFrobAt` by `g • x ≡ x ^ #(A ⧸ v) (mod Q)` with
 `#` read as `Nat.card`; if `A ⧸ v` is infinite that cardinal is `0`, the
-congruence at `x = 0` forces `1 ∈ Q`, and `Q.IsPrime` fails. So there is no
+congruence at `x = 0` forces `1 ∈ Q`, and `Q.IsPrime` fails; Mathlib records
+this as `AlgHom.IsArithFrobAt.finite_quotient`. So there is no
 degenerate `q = 0` reading, but `FrobeniusChoice` below is uninhabited for any
 `A` with an infinite residue field, and every result taking one is then
 vacuously true. -/
@@ -205,9 +207,11 @@ Existence of Frobenius elements in the *absolute* Galois group is not available
 in Mathlib v4.28.0. `IsArithFrobAt.exists_of_isInvariant` fails at `K̄` on three
 counts: it requires a finite residue field at the chosen prime (at `K̄`
 that field is the algebraic closure of `A/v`), a finite acting group, and
-`Algebra.IsInvariant`. Proving existence needs the surjectivity of the
-decomposition group onto the residue Galois group together with an
-inverse-limit or Zorn argument over finite subextensions.
+`Algebra.IsInvariant`. Mathlib's profinite
+machinery (`RingTheory/Invariant/Profinite.lean`) supplies the
+decomposition-group surjectivity and the inverse-limit argument, but under an
+`Algebra.IsInvariant` hypothesis that fails for the integral closure in `K̄`;
+see AUDIT.md.
 
 Taking it as data rather than deriving it makes the assumption explicit and
 removes the vacuity that an unquantified `IsFrobAt v g → ...` would introduce.
@@ -220,7 +224,7 @@ structure FrobeniusChoice where
 
 end FrobeniusChoice
 
-section VacuityFree
+section Compatibility
 
 variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
   [Algebra A K] [IsFractionRing A K]
@@ -234,7 +238,9 @@ variable (E : Type*) [Field E] [NumberField E] (n : ℕ)
 Quantifying over all `Q` rather than one avoids having to prove transitivity of
 the Galois action on primes above `v` before each use. The two readings agree
 mathematically, since primes above `v` are conjugate and `ker ρ` is normal, but
-that transitivity is not proved here and is not available in Mathlib v4.28.0.
+that transitivity is not proved here; Mathlib v4.28.0's transitivity lemmas,
+finite and profinite, both carry an invariance hypothesis that fails for the
+integral closure in `K̄`.
 
 If no prime of the integral closure lies over `v` this holds vacuously; that
 primes do lie over `v` is true but is likewise not proved here. -/
@@ -281,7 +287,7 @@ def IsIrred {lam : CoeffPlace E} (rho : LambdaAdicRep K Kbar E n lam) : Prop :=
         (rho.toHom g : Matrix (Fin n) (Fin n) (Completion E lam)).mulVec w ∈ W) →
       W = ⊥ ∨ W = ⊤
 
-end VacuityFree
+end Compatibility
 
 section AbsoluteConditions
 
@@ -334,8 +340,8 @@ extension of `E_λ`, and the obstruction to descending further for a fixed `E` i
 the class of a central simple algebra, which Lafforgue's own proof works with.
 Removing it by enlarging `E` is Chin's theorem, and is not formalised here.
 
-The topology is pinned by `IsModuleTopology`, not left arbitrary: an unspecified
-topology would make `Continuous` meaningless. -/
+The topology is pinned by `IsModuleTopology`, not left arbitrary: against an
+arbitrary topology, `Continuous` would not assert the intended condition. -/
 structure CompanionRep (K Kbar : Type*) [Field K] [Field Kbar] [Algebra K Kbar]
     (E : Type u) [Field E] [NumberField E] (n : ℕ) (lam : CoeffPlace E) where
   /-- The coefficient field, a finite extension of `E_λ`. -/
@@ -496,7 +502,7 @@ theorem exists_companion_family
 
 end CompanionFamily
 
-section InertiaCorrect
+section FrobeniusIndependence
 
 variable (A K Kbar : Type*) [CommRing A] [IsDedekindDomain A] [Field K]
   [Algebra A K] [IsFractionRing A K]
@@ -538,6 +544,6 @@ theorem charpoly_eq_of_isArithFrobAt {lam : CoeffPlace E}
       = (rho.toHom g' : Matrix (Fin n) (Fin n) (Completion E lam)).charpoly := by
   rw [toHom_eq_of_isArithFrobAt A K Kbar E n rho hunram hQp hQu hg hg']
 
-end InertiaCorrect
+end FrobeniusIndependence
 
 end LambdaAdicSlice
