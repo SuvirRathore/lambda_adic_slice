@@ -1,9 +1,10 @@
 # Audit record
 
-`lake build` kernel-checks the proofs that are given, accepting `sorry` as an
-axiom; it says nothing about whether the definitions mean what they claim. This
-file records what Mathlib v4.28.0 could and could not supply, the errors found,
-and which claims are not machine-checked.
+This file records what Mathlib v4.28.0 could and could not supply, the errors
+found, the adversarial probes run with Aristotle, an automated theorem prover,
+and which claims are not machine-checked. `lake build` kernel-checks the proofs
+that are given, accepting `sorry` as an axiom; it says nothing about whether
+the definitions mean what they claim.
 
 ## Mathlib v4.28.0
 
@@ -244,7 +245,11 @@ invariant theory applies over the separable closure, where `A` is the ring of
 invariants of the integral closure; the obstruction recorded above, that the
 invariants over `K̄` contain the purely inseparable elements as well, is absent
 there. The arithmetic Frobenius it produces lifts to `Aut(K̄/K)` because
-`K̄/Ks` is purely inseparable. I audited the proof against the pinned source
+`K̄/Ks` is purely inseparable. The route is the one recorded above and marked
+as not carried out here; the prover had this record in its snapshot and
+executed the route, improving one step the record did not specify: an
+existence lemma at the profinite level in which surjectivity of the `q`-power
+map replaces finiteness of the top residue ring. I audited the proof against the pinned source
 and checked it with the kernel; it depends only on `propext`,
 `Classical.choice` and `Quot.sound`. The construction is not part of this
 repository: `FrobeniusChoice` remains data here and every result conditional on
